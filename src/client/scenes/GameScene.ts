@@ -1,37 +1,41 @@
 import Phaser from 'phaser'
 
+import Assets from '../assets/Assets'
+
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY = 'game'
 
+    private assets: Assets
+    private platforms?: Phaser.Physics.Arcade.StaticGroup
+
     constructor() {
         super(GameScene.KEY)
+        this.assets = new Assets(this)
     }
 
     preload() {
-        this.load.setBaseURL('http://labs.phaser.io')
-
-        this.load.image('sky', 'assets/skies/space3.png')
-        this.load.image('logo', 'assets/sprites/phaser3-logo.png')
-        this.load.image('red', 'assets/particles/red.png')
+        this.assets.load()
     }
 
     create() {
-        this.add.image(400, 300, 'sky')
+        const {width, height} = this.scale
 
-        const particles = this.add.particles('red')
+        this.add.image(0, 0, Assets.SKY)
+            .setOrigin(0, 0)
 
-        const emitter = particles.createEmitter({
-            speed: 100,
-            scale: {start: 1, end: 0},
-            blendMode: 'ADD'
-        })
+        this.platforms = this.physics.add.staticGroup()
 
-        const logo = this.physics.add.image(400, 100, 'logo')
+        const platformWidth = 400
+        const platformHeight = 32
+        const floorScale = 2
+        this.platforms.create(width / 2, height, Assets.PLATFORM)
+            .setScale(floorScale)
+            .refreshBody();
 
-        logo.setVelocity(100, 200)
-        logo.setBounce(1, 1)
-        logo.setCollideWorldBounds(true)
-
-        emitter.startFollow(logo)
+        this.platforms.create(width - platformWidth / 4, height / 2 + 4 * platformHeight, Assets.PLATFORM)
+        this.platforms.create(platformWidth / 4, height / 2 + 4 * platformHeight, Assets.PLATFORM)
+        this.platforms.create(width / 2, height / 2, Assets.PLATFORM)
+        this.platforms.create(width - platformWidth / 3, height / 2 - 4 * platformHeight, Assets.PLATFORM)
+        this.platforms.create(platformWidth / 3, height / 2 - 4 * platformHeight, Assets.PLATFORM)
     }
 }
