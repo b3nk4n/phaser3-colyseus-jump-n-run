@@ -2,11 +2,11 @@ import Phaser from 'phaser'
 
 export default class Assets {
 
-    public static readonly SKY = 'sky'
-    public static readonly PLATFORM = 'platform'
-    public static readonly STAR = 'star'
-    public static readonly BOMB = 'bomb'
-    public static readonly PLAYER = 'player'
+    public static readonly SKY: string = 'sky'
+    public static readonly PLATFORM: string = 'platform'
+    public static readonly STAR: string = 'star'
+    public static readonly BOMB: string = 'bomb'
+    public static readonly PLAYER: string = 'player'
 
     private readonly context: Phaser.Scene
 
