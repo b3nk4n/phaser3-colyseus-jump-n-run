@@ -13,14 +13,14 @@ export default class BoostrapScene extends Phaser.Scene {
         this.assets = new Assets(this)
     }
 
-    init() {
+    init(): void {
     }
 
-    preload() {
+    preload(): void {
         this.assets.load()
     }
 
-    create() {
+    create(): void {
         this.scene.launch(GameScene.KEY)
     }
 }

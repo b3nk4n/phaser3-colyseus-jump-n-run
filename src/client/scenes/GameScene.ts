@@ -2,24 +2,32 @@ import Phaser from 'phaser'
 
 import Assets from '../assets/Assets'
 import Player from '../objects/Player'
+import Hud from '../ui/Hud'
 
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
 
-
-    private platforms?: Phaser.Physics.Arcade.StaticGroup
     private player!: Player
+    private platforms?: Phaser.Physics.Arcade.StaticGroup
+    private stars?: Phaser.Physics.Arcade.Group
+    private hud?: Hud
 
     constructor() {
         super(GameScene.KEY)
     }
 
-    create() {
+    create(): void {
         this.platforms = this.createWorld()
         this.player = new Player(this)
         this.player.create()
+        this.stars = this.createStars(12)
+        this.hud = new Hud(this)
+        this.hud.create()
 
         this.physics.add.collider(this.player.sprite, this.platforms)
+        this.physics.add.collider(this.stars, this.platforms)
+
+        this.physics.add.overlap(this.player.sprite, this.stars, this.onCollectStar, undefined, this)
     }
 
     private createWorld(): Phaser.Physics.Arcade.StaticGroup {
@@ -45,7 +53,30 @@ export default class GameScene extends Phaser.Scene {
         return platforms
     }
 
-    update(time: number, delta: number) {
+    private createStars(numStars: number): Phaser.Physics.Arcade.Group {
+        const stars = this.physics.add.group({
+            key: Assets.STAR,
+            repeat: numStars - 1,
+            setXY: {
+                x: 12,
+                y: 0,
+                stepX: 70
+            }
+        })
+        stars.children.iterate((child) => {
+            child.setBounceY(Phaser.Math.FloatBetween(0.8, 0.99))
+        })
+        return stars
+    }
+
+    update(time: number, delta: number): void {
         this.player.update(time, delta)
+    }
+
+    private onCollectStar(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, star: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+        // FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
+        star.disableBody(true, true)
+
+        this.hud?.update(10)
     }
 }

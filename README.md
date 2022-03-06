@@ -6,8 +6,9 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-This basic jump 'n' run game is based on the TypeScript specific fork [phaser3-typescript-parcel-template](https://github.com/ourcade/phaser3-typescript-parcel-template)
-and started with the tutorial series of [ourcade](https://www.youtube.com/channel/UCJyrgLkI9LcwzUhZXxrwpyA).
+This basic jump 'n' run game is based on the TypeScript specific fork [phaser3-typescript-parcel-template](https://github.com/ourcade/phaser3-typescript-parcel-template).
+It extends [Phaser's game tutorial](https://phaser.io/tutorials/making-your-first-phaser-3-game) and took some ideas from the tutorial series of [ourcade](https://www.youtube.com/channel/UCJyrgLkI9LcwzUhZXxrwpyA) for the basic
+client and server setup.
 
 ## Prerequisites
 
