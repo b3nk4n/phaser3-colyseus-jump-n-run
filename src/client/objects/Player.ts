@@ -17,6 +17,8 @@ export default class Player {
     private readonly context: Phaser.Scene
     private _sprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
 
+    private _dead: boolean = false
+
     constructor(context: Phaser.Scene) {
         this.context = context
     }
@@ -63,6 +65,8 @@ export default class Player {
     }
 
     private handleInput(): void {
+        if (this.dead) return
+
         const touchGround = this._sprite.body.touching.down
         const cursors = this.context.input.keyboard.createCursorKeys()
         if (cursors.left.isDown) {
@@ -79,6 +83,11 @@ export default class Player {
     }
 
     private updateAnimations(): void {
+        if (this.dead) {
+            this.sprite.anims.play(Player.ANIM_TURN)
+            return
+        }
+
         const velocityX = this.sprite.body.velocity.x
         if (Math.abs(velocityX) < 25) {
             this.sprite.anims.play(Player.ANIM_TURN)
@@ -91,7 +100,16 @@ export default class Player {
         }
     }
 
+    public kill(): void {
+        this.sprite.setTint(0xff0000)
+        this._dead = true
+    }
+
     get sprite(): Phaser.GameObjects.Sprite {
         return this._sprite
+    }
+
+    get dead() {
+        return this._dead
     }
 }
