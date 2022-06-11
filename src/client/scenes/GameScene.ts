@@ -27,6 +27,7 @@ export default class GameScene extends Phaser.Scene {
         this.diamonds = this.createDiamonds()
 
         this.bombs = this.physics.add.group()
+        this.addBomb()
 
         this.hud = new Hud(this)
         this.hud.create()
@@ -39,7 +40,9 @@ export default class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.bombs, this.platforms)
         // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-        this.physics.add.collider(this.player.sprite, this.bombs, this.onBombHit, null, this)
+        const playerBombCollider = this.physics.add.collider(this.player.sprite, this.bombs, this.onBombHit, () => {
+            this.physics.world.removeCollider(playerBombCollider)
+        }, this)
     }
 
     private createWorld(): Phaser.Physics.Arcade.StaticGroup {
@@ -107,21 +110,24 @@ export default class GameScene extends Phaser.Scene {
                 child.enableBody(true, child.x, 0, true, true)
             })
 
-            const x = player.x < 400
-                ? Phaser.Math.Between(400, 800)
-                : Phaser.Math.Between(0, 400)
-
-            this.bombs?.create(x, 16, Assets.BOMB)
-                .setBounce(1)
-                .setCollideWorldBounds(true)
-                .setVelocity(Phaser.Math.Between(-200, 200), 20)
+            this.addBomb()
         }
     }
 
     private onBombHit(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
                       bomb: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-        this.physics.pause()
-
         this.player.kill()
+    }
+
+    private addBomb(): void {
+        const halfWidth = this.scale.width / 2
+        const x = this.player.sprite.x < halfWidth
+            ? Phaser.Math.Between(halfWidth, 2 * halfWidth)
+            : Phaser.Math.Between(0, halfWidth)
+
+        this.bombs?.create(x, 16, Assets.BOMB)
+            .setBounce(1)
+            .setCollideWorldBounds(true)
+            .setVelocity(Phaser.Math.Between(-200, 200), 20)
     }
 }

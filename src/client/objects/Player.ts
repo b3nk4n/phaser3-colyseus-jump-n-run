@@ -84,7 +84,11 @@ export default class Player {
     }
 
     private handleInput(): void {
-        if (this.dead) return
+        if (this.dead) {
+            this._sprite.setVelocityX(0)
+            this
+            return
+        }
 
         const touchGround = this.isTouchingGround()
         const cursors = this.context.input.keyboard.createCursorKeys()
