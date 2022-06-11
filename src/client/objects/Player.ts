@@ -27,7 +27,7 @@ export default class Player {
     }
 
     public create(): void {
-        this._sprite = this.context.physics.add.sprite(100, 450, Assets.PLAYER_IDLE)
+        this._sprite = this.context.physics.add.sprite(100, this.context.scale.height - 32 * 1.5, Assets.PLAYER_IDLE)
             .setBounce(0.1)
             .setCollideWorldBounds(true)
 
