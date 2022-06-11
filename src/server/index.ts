@@ -1,10 +1,10 @@
-import {Server} from 'colyseus'
-import {createServer} from 'http'
-import cors from 'cors'
+import { monitor } from '@colyseus/monitor'
+import { createServer } from 'http'
+import { Server } from 'colyseus'
 import express from 'express'
-import {monitor} from '@colyseus/monitor'
+import cors from 'cors'
 
-import {GameRoom} from './rooms/GameRoom'
+import { GameRoom } from './rooms/GameRoom'
 
 const port = Number(process.env.port) || 3000
 

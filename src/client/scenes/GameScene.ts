@@ -1,15 +1,16 @@
 import Phaser from 'phaser'
 
-import Assets from '../assets/Assets'
 import Player from '../objects/Player'
+import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
+    public static readonly TILE_SIZE: number = 32
 
     private player!: Player
     private platforms?: Phaser.Physics.Arcade.StaticGroup
-    private stars?: Phaser.Physics.Arcade.Group
+    private diamonds?: Phaser.Physics.Arcade.Group
     private bombs?: Phaser.Physics.Arcade.Group
     private hud?: Hud
 
@@ -23,7 +24,7 @@ export default class GameScene extends Phaser.Scene {
         this.player = new Player(this)
         this.player.create()
 
-        this.stars = this.createStars(12)
+        this.diamonds = this.createDiamonds()
 
         this.bombs = this.physics.add.group()
 
@@ -31,10 +32,10 @@ export default class GameScene extends Phaser.Scene {
         this.hud.create()
 
         this.physics.add.collider(this.player.sprite, this.platforms)
-        this.physics.add.collider(this.stars, this.platforms)
+        this.physics.add.collider(this.diamonds, this.platforms)
 
         // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-        this.physics.add.overlap(this.player.sprite, this.stars, this.onCollectStar, undefined, this)
+        this.physics.add.overlap(this.player.sprite, this.diamonds, this.onCollectDiamond, undefined, this)
 
         this.physics.add.collider(this.bombs, this.platforms)
         // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
@@ -42,56 +43,66 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private createWorld(): Phaser.Physics.Arcade.StaticGroup {
-        const {width, height} = this.scale
+        const { width, height } = this.scale
 
-        this.add.image(0, 0, Assets.SKY)
+        this.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 
         const platforms = this.physics.add.staticGroup()
 
-        const platformWidth = 400
-        const platformHeight = 32
-        const floorScale = 2
-        platforms.create(width / 2, height, Assets.PLATFORM)
-            .setScale(floorScale)
+        // fixed ground
+        platforms.create(width / 2, height - 16, Assets.BACKGROUND, 0, false)
+            .setScale(1.0, 32.0 / height)
             .refreshBody()
 
-        platforms.create(width - platformWidth / 4, height / 2 + 4 * platformHeight, Assets.PLATFORM)
-        platforms.create(platformWidth / 4, height / 2 + 4 * platformHeight, Assets.PLATFORM)
-        platforms.create(width / 2, height / 2, Assets.PLATFORM)
-        platforms.create(width - platformWidth / 3, height / 2 - 4 * platformHeight, Assets.PLATFORM)
-        platforms.create(platformWidth / 3, height / 2 - 4 * platformHeight, Assets.PLATFORM)
+        const platformDefs = [
+            { x: 0.5, y: 0.28, isSmall: true },
+            { x: 0.175, y: 0.4, isSmall: true },
+            { x: 0.825, y: 0.4, isSmall: true },
+            { x: 0.5, y: 0.55, isSmall: false },
+            { x: 0.225, y: 0.75, isSmall: false },
+            { x: 0.775, y: 0.75, isSmall: false }
+        ]
+
+        platformDefs.forEach(platformDef =>
+            platforms.create(
+                width * platformDef.x,
+                height * platformDef.y,
+                platformDef.isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE
+            )
+        )
+
         return platforms
     }
 
-    private createStars(numStars: number): Phaser.Physics.Arcade.Group {
-        const stars = this.physics.add.group({
-            key: Assets.STAR,
-            repeat: numStars - 1,
-            setXY: {
-                x: 12,
-                y: 0,
-                stepX: 70
-            }
-        })
-        stars.children.iterate((child) => {
-            // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-            child.setBounceY(Phaser.Math.FloatBetween(0.8, 0.99))
-        })
-        return stars
+    private createDiamonds(): Phaser.Physics.Arcade.Group {
+        const diamonds = this.physics.add.group()
+
+        for (let i = 0; i < 15; ++i) {
+            const isRed = Phaser.Math.RND.frac() > 0.75;
+            diamonds.create(32 + i * 64, 0, isRed ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN)
+                .setData({
+                    value: isRed ? 15 : 10
+                })
+                .setBounceY(Phaser.Math.FloatBetween(0.8, 0.99))
+                .setCollideWorldBounds(true)
+        }
+
+        return diamonds
     }
 
     update(time: number, delta: number): void {
         this.player.update(time, delta)
     }
 
-    private onCollectStar(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-                          star: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
-        star.disableBody(true, true)
-        this.hud?.update(10)
+    private onCollectDiamond(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+                             diamond: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+        diamond.disableBody(true, true)
+        const diamondValue = diamond.getData('value');
+        this.hud?.update(diamondValue)
 
-        if (this.stars?.countActive(true) === 0) {
-            this.stars.children.iterate((child) => {
+        if (this.diamonds?.countActive(true) === 0) {
+            this.diamonds.children.iterate((child) => {
                 // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
                 child.enableBody(true, child.x, 0, true, true)
             })
@@ -100,10 +111,10 @@ export default class GameScene extends Phaser.Scene {
                 ? Phaser.Math.Between(400, 800)
                 : Phaser.Math.Between(0, 400)
 
-            const bomb = this.bombs?.create(x, 16, Assets.BOMB)
-            bomb.setBounce(1)
-            bomb.setCollideWorldBounds(true)
-            bomb.setVelocity(Phaser.Math.Between(-200, 200), 20)
+            this.bombs?.create(x, 16, Assets.BOMB)
+                .setBounce(1)
+                .setCollideWorldBounds(true)
+                .setVelocity(Phaser.Math.Between(-200, 200), 20)
         }
     }
 

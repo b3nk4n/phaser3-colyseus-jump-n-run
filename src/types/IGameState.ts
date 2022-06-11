@@ -1,7 +1,5 @@
-import {Schema} from '@colyseus/schema'
+import { Schema } from '@colyseus/schema'
 
-export interface IGameState extends Schema {
+export default interface IGameState extends Schema {
     activePlayer: number
 }
-
-export default IGameState
