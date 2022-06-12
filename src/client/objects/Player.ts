@@ -92,7 +92,7 @@ export default class Player {
 
         const touchGround = this.isTouchingGround()
         const cursors = this.context.input.keyboard.createCursorKeys()
-        const movementFactor = touchGround ? 1.0 : 0.85;
+        const movementFactor = touchGround ? 1.0 : 0.85
 
         if (cursors.left.isDown) {
             this._sprite.setVelocityX(-Player.SPEED * movementFactor)

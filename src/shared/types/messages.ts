@@ -1,3 +1,4 @@
 export enum Message {
-    SomeCommand
+    SOME_COMMAND,
+    PLAYER_INDEX
 }

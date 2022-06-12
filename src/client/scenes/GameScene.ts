@@ -1,12 +1,21 @@
 import Phaser from 'phaser'
 
+import IGameState from '../../server/schema/GameState'
+import RoomClient from '../services/GameRoomClient'
+import Level from '../../server/schema/Level'
 import Player from '../objects/Player'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
+export interface IGameSceneData {
+    roomClient: RoomClient
+}
+
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
     public static readonly TILE_SIZE: number = 32
+
+    private roomClient?: RoomClient
 
     private player!: Player
     private platforms?: Phaser.Physics.Arcade.StaticGroup
@@ -18,8 +27,19 @@ export default class GameScene extends Phaser.Scene {
         super(GameScene.KEY)
     }
 
-    create(): void {
-        this.platforms = this.createWorld()
+    async create(data: IGameSceneData): Promise<void> {
+        this.roomClient = data.roomClient
+
+        if (!this.roomClient) {
+            throw new Error('Server connection is not available')
+        }
+
+        await this.roomClient.join()
+        this.roomClient.onStateInitialized(this.initGame, this)
+    }
+
+    private initGame(state: IGameState) {
+        this.platforms = this.createLevel(state.level)
 
         this.player = new Player(this)
         this.player.create()
@@ -45,7 +65,7 @@ export default class GameScene extends Phaser.Scene {
         }, this)
     }
 
-    private createWorld(): Phaser.Physics.Arcade.StaticGroup {
+    private createLevel(level: Level): Phaser.Physics.Arcade.StaticGroup {
         const { width, height } = this.scale
 
         this.add.image(0, 0, Assets.BACKGROUND)
@@ -58,16 +78,7 @@ export default class GameScene extends Phaser.Scene {
             .setScale(1.0, 32.0 / height)
             .refreshBody()
 
-        const platformDefs = [
-            { x: 0.5, y: 0.28, isSmall: true },
-            { x: 0.175, y: 0.4, isSmall: true },
-            { x: 0.825, y: 0.4, isSmall: true },
-            { x: 0.5, y: 0.55, isSmall: false },
-            { x: 0.225, y: 0.75, isSmall: false },
-            { x: 0.775, y: 0.75, isSmall: false }
-        ]
-
-        platformDefs.forEach(platformDef =>
+        level.platformDefs.forEach(platformDef =>
             platforms.create(
                 width * platformDef.x,
                 height * platformDef.y,
@@ -82,7 +93,7 @@ export default class GameScene extends Phaser.Scene {
         const diamonds = this.physics.add.group()
 
         for (let i = 0; i < 15; ++i) {
-            const isRed = Phaser.Math.RND.frac() > 0.75;
+            const isRed = Phaser.Math.RND.frac() > 0.75
             diamonds.create(32 + i * 64, 0, isRed ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN)
                 .setData({
                     value: isRed ? 15 : 10
@@ -95,13 +106,13 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.player.update(time, delta)
+        this.player?.update(time, delta)
     }
 
     private onCollectDiamond(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
                              diamond: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
         diamond.disableBody(true, true)
-        const diamondValue = diamond.getData('value');
+        const diamondValue = diamond.getData('value')
         this.hud?.update(diamondValue)
 
         if (this.diamonds?.countActive(true) === 0) {

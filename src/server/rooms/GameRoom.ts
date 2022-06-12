@@ -11,7 +11,7 @@ export class GameRoom extends Room<GameState> {
         this.maxClients = 2
         this.setState(new GameState())
 
-        this.onMessage(Message.SomeCommand, (client: Client, message: { someData: number }) => {
+        this.onMessage(Message.SOME_COMMAND, (client: Client, message: { someData: number }) => {
             // dispatch command
         })
     }
