@@ -7,7 +7,9 @@ import Bomb from '../../server/schema/Bomb'
 
 export enum GamePhase {
     WAITING_FOR_OPPONENT,
+    READY,
     PLAYING,
+    PAUSED,
     GAME_OVER
 }
 

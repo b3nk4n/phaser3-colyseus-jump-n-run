@@ -1,4 +1,8 @@
 export enum Message {
-    SOME_COMMAND,
+    START_SIGNAL,
     PLAYER_INDEX
+}
+
+export interface IPlayerMessage {
+    playerIdx: number
 }

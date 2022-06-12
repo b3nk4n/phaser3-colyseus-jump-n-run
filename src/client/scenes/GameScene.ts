@@ -7,7 +7,6 @@ import Player from '../objects/Player'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
-
 export interface IGameSceneData {
     roomClient: RoomClient
 }
@@ -52,6 +51,8 @@ export default class GameScene extends Phaser.Scene {
 
         this.handlePhaseChanged(state.phase)
         this.roomClient?.onPhaseChanged(this.handlePhaseChanged, this)
+
+        this.input.keyboard.on('keydown-SPACE', this.onSpaceKeyDown, this)
     }
 
     private startGame(): void {
@@ -115,14 +116,22 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        if (this.roomClient?.phase !== GamePhase.PLAYING) return
+        if (this.roomClient?.phase === GamePhase.PLAYING) {
+            this.player?.update(time, delta)
+        }
+    }
 
-        this.player?.update(time, delta)
+    private onSpaceKeyDown(): void {
+        if (this.roomClient?.phase === GamePhase.READY) {
+            this.roomClient.sendStartSignal()
+        }
     }
 
     private handlePhaseChanged(phase: GamePhase) {
         if (phase === GamePhase.WAITING_FOR_OPPONENT) {
             this.hud?.updateStatus('Waiting for opponent...')
+        } else if (phase === GamePhase.READY) {
+            this.hud?.updateStatus('Press SPACE to start!')
         } else if (phase === GamePhase.PLAYING) {
             this.hud?.clearStatus()
             this.startGame()

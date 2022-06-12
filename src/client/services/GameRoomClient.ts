@@ -1,8 +1,8 @@
-import { Client, Room } from 'colyseus.js'
+import {Client, Room} from 'colyseus.js'
 import Phaser from 'phaser'
 
-import IGameState, { GamePhase } from '../../server/schema/GameState'
-import { Message } from '../../shared/types/messages'
+import IGameState, {GamePhase} from '../../server/schema/GameState'
+import {Message} from '../../shared/types/messages'
 
 export default class RoomClient {
     private static readonly EVENT_STATE_INIT: string = 'state-initialized'
@@ -52,6 +52,10 @@ export default class RoomClient {
 
     dispose(): void {
         this.removePhaseListener()
+    }
+
+    sendStartSignal(): void {
+        this.room?.send(Message.START_SIGNAL, { playerIdx: this.playerIndex })
     }
 
     get playerIndex(): number {
