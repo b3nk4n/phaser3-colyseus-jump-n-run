@@ -46,6 +46,10 @@ export default class RoomClient {
         this.events.once(RoomClient.EVENT_STATE_INIT, callback, context)
     }
 
+    onPhaseChanged(callback: (phase: GamePhase) => void, context?: any) {
+        this.events.on(RoomClient.EVENT_PHASE_CHANGED, callback, context)
+    }
+
     dispose(): void {
         this.removePhaseListener()
     }

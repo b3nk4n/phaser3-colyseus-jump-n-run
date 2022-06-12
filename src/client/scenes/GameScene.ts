@@ -1,11 +1,12 @@
 import Phaser from 'phaser'
 
-import IGameState from '../../server/schema/GameState'
+import IGameState, {GamePhase} from '../../server/schema/GameState'
 import RoomClient from '../services/GameRoomClient'
 import Level from '../../server/schema/Level'
 import Player from '../objects/Player'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
+
 
 export interface IGameSceneData {
     roomClient: RoomClient
@@ -44,15 +45,23 @@ export default class GameScene extends Phaser.Scene {
         this.player = new Player(this)
         this.player.create()
 
+        this.physics.add.collider(this.player.sprite, this.platforms)
+
+        this.hud = new Hud(this)
+        this.hud.create()
+
+        this.handlePhaseChanged(state.phase)
+        this.roomClient?.onPhaseChanged(this.handlePhaseChanged, this)
+    }
+
+    private startGame(): void {
+        if (!this.platforms) return
+
         this.diamonds = this.createDiamonds()
 
         this.bombs = this.physics.add.group()
         this.addBomb()
 
-        this.hud = new Hud(this)
-        this.hud.create()
-
-        this.physics.add.collider(this.player.sprite, this.platforms)
         this.physics.add.collider(this.diamonds, this.platforms)
 
         // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
@@ -106,14 +115,25 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
+        if (this.roomClient?.phase !== GamePhase.PLAYING) return
+
         this.player?.update(time, delta)
+    }
+
+    private handlePhaseChanged(phase: GamePhase) {
+        if (phase === GamePhase.WAITING_FOR_OPPONENT) {
+            this.hud?.updateStatus('Waiting for opponent...')
+        } else if (phase === GamePhase.PLAYING) {
+            this.hud?.clearStatus()
+            this.startGame()
+        }
     }
 
     private onCollectDiamond(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
                              diamond: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
         diamond.disableBody(true, true)
         const diamondValue = diamond.getData('value')
-        this.hud?.update(diamondValue)
+        this.hud?.updateScore(diamondValue)
 
         if (this.diamonds?.countActive(true) === 0) {
             this.diamonds.children.iterate((child) => {

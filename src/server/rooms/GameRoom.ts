@@ -1,8 +1,8 @@
-import { Dispatcher } from '@colyseus/command'
-import { Client, Room } from 'colyseus'
+import {Dispatcher} from '@colyseus/command'
+import {Client, Room} from 'colyseus'
 
-import { Message } from '../../shared/types/messages'
-import GameState from '../schema/GameState'
+import {Message} from '../../shared/types/messages'
+import GameState, {GamePhase} from '../schema/GameState'
 
 export class GameRoom extends Room<GameState> {
     private dispatcher = new Dispatcher(this)
@@ -19,8 +19,10 @@ export class GameRoom extends Room<GameState> {
     async onJoin(client: Client, options: any, auth: any) {
         const playerIndex = this.clients.findIndex(c => c.sessionId === client.sessionId)
         console.log(client.sessionId, `Player index ${playerIndex} with sessionId ${client.sessionId} joined.`)
+        client.send(Message.PLAYER_INDEX, { playerIndex })
 
         if (this.clients.length >= 2) {
+            this.state.phase = GamePhase.PLAYING
             await this.lock()
         }
     }
