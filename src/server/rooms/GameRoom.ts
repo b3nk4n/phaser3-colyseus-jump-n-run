@@ -1,7 +1,7 @@
 import { Dispatcher } from '@colyseus/command'
 import { Client, Room } from 'colyseus'
 
-import { Message } from '../../types/messages'
+import { Message } from '../../shared/types/messages'
 import GameState from '../schema/GameState'
 
 export class GameRoom extends Room<GameState> {
