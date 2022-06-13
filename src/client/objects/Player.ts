@@ -23,6 +23,7 @@ export default class Player {
     private _sprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
 
     private _attacking: boolean = false
+    private _dizzyCountdown: number = 0
     private _dead: boolean = false
 
     constructor(context: Phaser.Scene) {
@@ -101,10 +102,14 @@ export default class Player {
     public update(time: number, delta: number): void {
         this.handleInput()
         this.updateAnimations()
+
+        if (this.dizzy) {
+            this._dizzyCountdown -= delta
+        }
     }
 
     private handleInput(): void {
-        if (this.dead) {
+        if (this.dead || this.dizzy) {
             this._sprite.setVelocity(0, 300)
             return
         }
@@ -144,6 +149,11 @@ export default class Player {
             return
         }
 
+        if (this.dizzy) {
+            this.sprite.anims.play(Player.ANIM_DIZZY)
+            return
+        }
+
         const velocityX = this.sprite.body.velocity.x
         const velocityY = this.sprite.body.velocity.y - Player.IDLE_VELOCITY_Y
 
@@ -153,7 +163,7 @@ export default class Player {
         const isJumpingDown = velocityY >= 25
 
         this.sprite.flipX = isLeft
-        console.log({dx: this.sprite.displayOriginX,dy: this.sprite.displayOriginY});
+
         if (this._attacking) {
             this.sprite.anims.play(Player.ANIM_ATTACK, true)
             return
@@ -178,6 +188,12 @@ export default class Player {
         }
     }
 
+    public punch(): void {
+        if (!this.dizzy) {
+            this._dizzyCountdown = 2500
+        }
+    }
+
     public kill(): void {
         this.sprite.setTint(0xffcccc)
         this._dead = true
@@ -189,6 +205,10 @@ export default class Player {
 
     get sprite(): Phaser.GameObjects.Sprite {
         return this._sprite
+    }
+
+    get dizzy() {
+        return this._dizzyCountdown > 0
     }
 
     get dead() {
