@@ -15,11 +15,14 @@ export default class Player {
     private static readonly ANIM_RIGHT: string = 'right'
     private static readonly ANIM_UP: string = 'up'
     private static readonly ANIM_DOWN: string = 'down'
+    private static readonly ANIM_ATTACK: string = 'attack'
+    private static readonly ANIM_DIZZY: string = 'dizzy'
     private static readonly ANIM_DEAD: string = 'dead'
 
     private readonly context: Phaser.Scene
     private _sprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
 
+    private _attacking: boolean = false
     private _dead: boolean = false
 
     constructor(context: Phaser.Scene) {
@@ -28,14 +31,15 @@ export default class Player {
 
     public create(): void {
         this._sprite = this.context.physics.add.sprite(100, this.context.scale.height - 32 * 1.5, Assets.PLAYER_IDLE)
-            .setBounce(0.1)
+            .setOrigin(1, 0.5)
             .setCollideWorldBounds(true)
+
+        this._sprite
 
         const animContext = this.context.anims
         animContext.create({
             key: Player.ANIM_RIGHT,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_RUN_RIGHT, {
-                start: 0,
                 end: 5
             }),
             frameRate: 16
@@ -44,7 +48,6 @@ export default class Player {
         animContext.create({
             key: Player.ANIM_IDLE,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_IDLE, {
-                start: 0,
                 end: 9
             }),
             frameRate: 8
@@ -69,6 +72,23 @@ export default class Player {
         })
 
         animContext.create({
+            key: Player.ANIM_ATTACK,
+            frames: animContext.generateFrameNumbers(Assets.PLAYER_ATTACK, {
+                end: 3
+            }),
+            frameRate: 8
+        })
+
+        animContext.create({
+            key: Player.ANIM_DIZZY,
+            frames: [{
+                key: Assets.PLAYER_DIZZY,
+                frame: 0
+            }],
+            frameRate: -1
+        })
+
+        animContext.create({
             key: Player.ANIM_DEAD,
             frames: [{
                 key: Assets.PLAYER_DEAD,
@@ -85,12 +105,19 @@ export default class Player {
 
     private handleInput(): void {
         if (this.dead) {
-            this._sprite.setVelocityX(0)
-            this
+            this._sprite.setVelocity(0, 300)
             return
         }
 
         const touchGround = this.isTouchingGround()
+        const spaceKey = this.context.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+
+        this._attacking = spaceKey.isDown;
+        if (this._attacking) {
+            this.applyFrictionToPlayer(touchGround)
+            return
+        }
+
         const cursors = this.context.input.keyboard.createCursorKeys()
         const movementFactor = touchGround ? 1.0 : 0.85
 
@@ -99,12 +126,16 @@ export default class Player {
         } else if (cursors.right.isDown) {
             this._sprite.setVelocityX(Player.SPEED * movementFactor)
         } else {
-            const friction = touchGround ? 0.85 : 0.95
-            this._sprite.setVelocityX(this.sprite.body.velocity.x * friction)
+            this.applyFrictionToPlayer(touchGround)
         }
         if (cursors.up.isDown && touchGround) {
             this._sprite.setVelocityY(-Player.JUMP_SPEED)
         }
+    }
+
+    private applyFrictionToPlayer(touchGround) {
+        const friction = touchGround ? 0.85 : 0.95
+        this._sprite.setVelocityX(this.sprite.body.velocity.x * friction)
     }
 
     private updateAnimations(): void {
@@ -122,6 +153,11 @@ export default class Player {
         const isJumpingDown = velocityY >= 25
 
         this.sprite.flipX = isLeft
+        console.log({dx: this.sprite.displayOriginX,dy: this.sprite.displayOriginY});
+        if (this._attacking) {
+            this.sprite.anims.play(Player.ANIM_ATTACK, true)
+            return
+        }
 
         if (isIdle) {
             this.sprite.anims.play(Player.ANIM_IDLE, true)
@@ -147,6 +183,10 @@ export default class Player {
         this._dead = true
     }
 
+    public isTouchingGround() {
+        return this._sprite.body.touching.down
+    }
+
     get sprite(): Phaser.GameObjects.Sprite {
         return this._sprite
     }
@@ -155,7 +195,7 @@ export default class Player {
         return this._dead
     }
 
-    public isTouchingGround() {
-        return this._sprite.body.touching.down
+    get attacking() {
+        return this._attacking
     }
 }

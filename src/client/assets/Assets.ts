@@ -12,6 +12,8 @@ export default class Assets {
     public static readonly PLAYER_RUN_RIGHT: string = 'player-run'
     public static readonly PLAYER_JUMP_UP: string = 'player-jump-up'
     public static readonly PLAYER_JUMP_DOWN: string = 'player-jump-down'
+    public static readonly PLAYER_ATTACK: string = 'player-attack'
+    public static readonly PLAYER_DIZZY: string = 'player-dizzy'
     public static readonly PLAYER_DEAD: string = 'player-dead'
 
     private readonly context: Phaser.Scene
@@ -44,6 +46,14 @@ export default class Assets {
         )
         loader.image(Assets.PLAYER_JUMP_UP, 'assets/player_jump_up.png')
         loader.image(Assets.PLAYER_JUMP_DOWN, 'assets/player_jump_down.png')
+        loader.spritesheet(Assets.PLAYER_ATTACK,
+            'assets/player_punch_4.png',
+            {
+                frameWidth: 32,
+                frameHeight: 32
+            }
+        )
+        loader.image(Assets.PLAYER_DIZZY, 'assets/player_dizzy.png')
         loader.image(Assets.PLAYER_DEAD, 'assets/player_dead.png')
     }
 }
