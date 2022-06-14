@@ -19,8 +19,8 @@ const gameServer = new Server({
 
 gameServer.define('game-room', GameRoom)
 
-app.use('/colyseus', monitor())
+app.use('/monitor', monitor())
 
 gameServer.listen(port)
 console.log(`Websocket on ws://localhost:${port}`)
-console.log(`Colyseus Monitor on http://localhost:${port}/colyseus/`)
+console.log(`Colyseus Monitor on http://localhost:${port}/monitor`)

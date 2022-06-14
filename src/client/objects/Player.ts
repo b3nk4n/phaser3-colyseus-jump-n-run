@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 
+import { IControls } from '../../server/schema/Controls'
 import Assets from '../assets/Assets'
 
 /**
@@ -30,12 +31,10 @@ export default class Player {
         this.context = context
     }
 
-    public create(): void {
-        this._sprite = this.context.physics.add.sprite(100, this.context.scale.height - 32 * 1.5, Assets.PLAYER_IDLE)
+    public create(x: number, y: number): void {
+        this._sprite = this.context.physics.add.sprite(x, y, Assets.PLAYER_IDLE)
             .setOrigin(1, 0.5)
             .setCollideWorldBounds(true)
-
-        this._sprite
 
         const animContext = this.context.anims
         animContext.create({
@@ -100,7 +99,6 @@ export default class Player {
     }
 
     public update(time: number, delta: number): void {
-        this.handleInput()
         this.updateAnimations()
 
         if (this.dizzy) {
@@ -108,32 +106,30 @@ export default class Player {
         }
     }
 
-    private handleInput(): void {
+    public handleInput(controls: IControls): void {
         if (this.dead || this.dizzy) {
             this._sprite.setVelocity(0, 300)
             return
         }
 
         const touchGround = this.isTouchingGround()
-        const spaceKey = this.context.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
-        this._attacking = spaceKey.isDown;
+        this._attacking = controls.space;
         if (this._attacking) {
             this.applyFrictionToPlayer(touchGround)
             return
         }
 
-        const cursors = this.context.input.keyboard.createCursorKeys()
         const movementFactor = touchGround ? 1.0 : 0.85
 
-        if (cursors.left.isDown) {
+        if (controls.left) {
             this._sprite.setVelocityX(-Player.SPEED * movementFactor)
-        } else if (cursors.right.isDown) {
+        } else if (controls.right) {
             this._sprite.setVelocityX(Player.SPEED * movementFactor)
         } else {
             this.applyFrictionToPlayer(touchGround)
         }
-        if (cursors.up.isDown && touchGround) {
+        if (controls.up && touchGround) {
             this._sprite.setVelocityY(-Player.JUMP_SPEED)
         }
     }

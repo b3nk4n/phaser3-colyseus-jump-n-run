@@ -13,7 +13,7 @@ export enum GamePhase {
     GAME_OVER
 }
 
-export default interface IGameState {
+export interface IGameState {
     phase: GamePhase
     players: ArraySchema<Player>
     level: Level
@@ -36,4 +36,22 @@ export default class GameState extends Schema implements IGameState {
 
     @type([Diamond])
     diamonds: ArraySchema<Diamond> = new ArraySchema<Diamond>()
+
+    addPlayer(id: string, x: number): Player {
+        const player = new Player(id, 10, 10)
+        this.players.push(player)
+        return player
+    }
+
+    addBomb(): Bomb {
+        const bomb = new Bomb(100, 10)
+        this.bombs.push(bomb)
+        return bomb
+    }
+
+    addDiamond(): Diamond {
+        const diamond = new Diamond(100, 10, 25)
+        this.diamonds.push(diamond)
+        return diamond
+    }
 }

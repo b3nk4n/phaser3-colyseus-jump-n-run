@@ -1,8 +1,15 @@
+import { IControls } from '../../server/schema/Controls'
+
 export enum Message {
     START_SIGNAL,
-    PLAYER_INDEX
+    PLAYER_INDEX,
+    PLAYER_CONTROLS
 }
 
 export interface IPlayerMessage {
     playerIdx: number
+}
+
+export interface IPlayerControlsMessage extends IPlayerMessage {
+    controls: IControls
 }

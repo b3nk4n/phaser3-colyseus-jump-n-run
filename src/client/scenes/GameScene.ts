@@ -1,7 +1,9 @@
 import Phaser from 'phaser'
 
-import IGameState, {GamePhase} from '../../server/schema/GameState'
-import RoomClient from '../services/GameRoomClient'
+import RoomClient, { IPositionUpdate } from '../services/GameRoomClient'
+import { IGameState, GamePhase } from '../../server/schema/GameState'
+import { IControls } from '../../server/schema/Controls'
+import { IPlayer } from '../../server/schema/Player'
 import Level from '../../server/schema/Level'
 import Player from '../objects/Player'
 import Assets from '../assets/Assets'
@@ -18,10 +20,18 @@ export default class GameScene extends Phaser.Scene {
     private roomClient?: RoomClient
 
     private player!: Player
+    private otherPlayers: Player[] = []
     private platforms?: Phaser.Physics.Arcade.StaticGroup
     private diamonds?: Phaser.Physics.Arcade.Group
     private bombs?: Phaser.Physics.Arcade.Group
     private hud?: Hud
+
+    private activeControls: IControls = {
+        up: false,
+        left: false,
+        right: false,
+        space: false
+    }
 
     constructor() {
         super(GameScene.KEY)
@@ -36,13 +46,44 @@ export default class GameScene extends Phaser.Scene {
 
         await this.roomClient.join()
         this.roomClient.onStateInitialized(this.initGame, this)
+        this.roomClient.onPlayerAdded(this.otherPlayerJoined, this)
+        this.roomClient.onPlayerPositionUpdated(this.currentPlayerPositionUpdated, this.otherPlayerPositionUpdated, this)
+    }
+
+    private currentPlayerPositionUpdated(p: IPositionUpdate) {
+        if (p.x) {
+            this.player.sprite.x = p.x
+        }
+        if (p.y) {
+            this.player.sprite.y = p.y
+        }
+    }
+
+    private otherPlayerPositionUpdated(p: IPositionUpdate) {
+        // TODO support >1 opponents
+        const otherPlayer = this.otherPlayers[0]
+
+        if (p.x) {
+            otherPlayer.sprite.x = p.x
+        }
+        if (p.y) {
+            otherPlayer.sprite.y = p.y
+        }
     }
 
     private initGame(state: IGameState) {
         this.platforms = this.createLevel(state.level)
 
-        this.player = new Player(this)
-        this.player.create()
+        const sessionId = this.roomClient?.sessionId
+        this.roomClient?.players.forEach(p => {
+            const player = new Player(this)
+            player.create(p.x, p.y)
+            if (p.id === sessionId) {
+                this.player = player
+            } else {
+                this.otherPlayers.push(player)
+            }
+        })
 
         this.physics.add.collider(this.player.sprite, this.platforms)
 
@@ -53,6 +94,12 @@ export default class GameScene extends Phaser.Scene {
         this.roomClient?.onPhaseChanged(this.handlePhaseChanged, this)
 
         this.input.keyboard.on('keydown-SPACE', this.onSpaceKeyDown, this)
+    }
+
+    private otherPlayerJoined(player: IPlayer) {
+        const p = new Player(this)
+        p.create(player.x, player.y)
+        this.otherPlayers.push(p)
     }
 
     private startGame(): void {
@@ -117,7 +164,18 @@ export default class GameScene extends Phaser.Scene {
 
     update(time: number, delta: number): void {
         if (this.roomClient?.phase === GamePhase.PLAYING) {
-            this.player?.update(time, delta)
+            const cursors = this.input.keyboard.createCursorKeys()
+            const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+
+            this.activeControls.up = cursors.up.isDown
+            this.activeControls.left = cursors.left.isDown
+            this.activeControls.right = cursors.right.isDown
+            this.activeControls.space = spaceKey.isDown
+
+            //this.player.handleInput(this.activeControls) // TODO this not be necessary anymore as soon as server is in control
+            this.player.update(time, delta)
+
+            this.roomClient.sendPlayerControls(this.activeControls)
         }
     }
 
