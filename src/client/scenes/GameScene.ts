@@ -2,8 +2,8 @@ import Phaser from 'phaser'
 
 import RoomClient, { IPositionUpdate } from '../services/GameRoomClient'
 import { IGameState, GamePhase } from '../../server/schema/GameState'
-import { IControls } from '../../server/schema/Controls'
 import { IPlayer } from '../../server/schema/Player'
+import { IControls } from '~/shared/types/messages'
 import Level from '../../server/schema/Level'
 import Player from '../objects/Player'
 import Assets from '../assets/Assets'
@@ -172,7 +172,6 @@ export default class GameScene extends Phaser.Scene {
             this.activeControls.right = cursors.right.isDown
             this.activeControls.space = spaceKey.isDown
 
-            //this.player.handleInput(this.activeControls) // TODO this not be necessary anymore as soon as server is in control
             this.player.update(time, delta)
 
             this.roomClient.sendPlayerControls(this.activeControls)

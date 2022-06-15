@@ -1,5 +1,3 @@
-import { IControls } from '../../server/schema/Controls'
-
 export enum Message {
     START_SIGNAL,
     PLAYER_INDEX,
@@ -12,4 +10,11 @@ export interface IPlayerMessage {
 
 export interface IPlayerControlsMessage extends IPlayerMessage {
     controls: IControls
+}
+
+export interface IControls {
+    up: boolean
+    left: boolean
+    right: boolean
+    space: boolean
 }

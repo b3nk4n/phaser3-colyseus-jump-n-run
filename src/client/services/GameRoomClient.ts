@@ -2,9 +2,8 @@ import { Client, Room } from 'colyseus.js'
 import Phaser from 'phaser'
 
 import GameState, { IGameState, GamePhase } from '../../server/schema/GameState'
+import { IControls, Message } from '../../shared/types/messages'
 import Player, { IPlayer } from '../../server/schema/Player'
-import { IControls } from '../../server/schema/Controls'
-import { Message } from '../../shared/types/messages'
 
 export interface IPositionUpdate {
     x?: number,

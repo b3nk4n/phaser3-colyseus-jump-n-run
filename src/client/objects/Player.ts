@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
-import { IControls } from '../../server/schema/Controls'
 import Assets from '../assets/Assets'
+import { IControls } from '~/shared/types/messages'
 
 /**
  * The player game object using composition.
