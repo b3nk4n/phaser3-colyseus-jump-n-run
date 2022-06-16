@@ -41,6 +41,7 @@
 		"colyseus.js": "^0.14.13",
 		"cors": "^2.8.5",
 		"express": "^4.16.4",
+		"matter-js": "^0.18.0",
 		"phaser": "^3.55.2",
 		"regenerator": "^0.14.7",
 		"regenerator-runtime": "^0.13.9"
