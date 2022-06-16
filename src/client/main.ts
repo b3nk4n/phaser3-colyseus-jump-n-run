@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime'
 import Phaser from 'phaser'
 
 import SinglePlayerArcadeGameScene from './scenes/SinglePlayerArcadeGameScene'
+import SinglePlayerMatterGameScene from './scenes/SinglePlayerMatterGameScene'
 import MatterTestScene from './scenes/MatterTestScene'
 import BootstrapScene from './scenes/BoostrapScene'
 import GameScene from './scenes/GameScene'
@@ -19,7 +20,12 @@ const config: Phaser.Types.Core.GameConfig = {
             debug: true
         }
     },
-    scene: [BootstrapScene, GameScene, SinglePlayerArcadeGameScene, MatterTestScene]
+    scene: [
+        BootstrapScene,
+        GameScene,
+        SinglePlayerArcadeGameScene,
+        SinglePlayerMatterGameScene,
+        MatterTestScene]
 }
 
 export default new Phaser.Game(config)

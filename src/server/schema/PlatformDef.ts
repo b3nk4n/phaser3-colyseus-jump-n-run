@@ -1,10 +1,6 @@
 import { Schema, type } from '@colyseus/schema'
 
-export interface IPlatformDef {
-    x: number
-    y: number
-    isSmall: boolean
-}
+import { IPlatformDef } from '../../shared/types/commons'
 
 export default class PlatformDef extends Schema implements IPlatformDef {
     @type('number')

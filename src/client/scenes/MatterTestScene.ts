@@ -1,5 +1,5 @@
-import Phaser from 'phaser'
 import Matter from 'matter-js'
+import Phaser from 'phaser'
 
 import Assets from '../assets/Assets'
 
@@ -10,7 +10,6 @@ import Bodies = Matter.Bodies
 import Body = Matter.Body
 import Events = Matter.Events
 import Collision = Matter.Collision
-
 
 export default class MatterTestScene extends Phaser.Scene {
     public static readonly KEY: string = 'matter-test'

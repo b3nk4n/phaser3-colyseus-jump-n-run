@@ -1,8 +1,6 @@
 import Phaser from 'phaser'
 
-import SinglePlayerArcadeGameScene from '../../client/scenes/SinglePlayerArcadeGameScene'
-import MatterTestScene from '../../client/scenes/MatterTestScene'
-import GameScene from '../../client/scenes/GameScene'
+import SinglePlayerMatterGameScene from '../../client/scenes/SinglePlayerMatterGameScene'
 import RoomClient from '../services/GameRoomClient'
 import Assets from '../assets/Assets'
 
@@ -27,7 +25,7 @@ export default class BoostrapScene extends Phaser.Scene {
     }
 
     create(): void {
-        this.scene.launch(GameScene.KEY, {
+        this.scene.launch(SinglePlayerMatterGameScene.KEY, {
             roomClient: this.roomClient
         })
     }

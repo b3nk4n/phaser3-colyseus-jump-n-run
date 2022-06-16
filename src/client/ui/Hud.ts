@@ -2,7 +2,6 @@ import Phaser from 'phaser'
 
 export default class Hud {
 
-    private score: number = 0
     private text?: Phaser.GameObjects.Text
 
     private statusText?: Phaser.GameObjects.Text
@@ -16,7 +15,7 @@ export default class Hud {
     create(): void {
         this.text = this.context.add.text(
             16, 16,
-            'SCORE ' + this.score,
+            'SCORE ' + 0,
             {
                 fontSize: '28px',
                 color: '#FFF'
@@ -30,17 +29,16 @@ export default class Hud {
             .setVisible(false)
     }
 
-    updateScore(scoreDelta: number): void {
-        this.score += scoreDelta
-        this.text?.setText('SCORE ' + this.score)
+    updateScore(value: number): void {
+        this.text?.setText('SCORE ' + value)
     }
 
-    updateStatus(statusMessage: string): void {
+    showMessage(statusMessage: string): void {
         this.statusText?.setText(statusMessage)
             .setVisible(true)
     }
 
-    clearStatus(): void {
+    clearMessage(): void {
         this.statusText?.setText('')
             .setVisible(false)
     }
