@@ -1,6 +1,7 @@
 import 'regenerator-runtime/runtime'
 import Phaser from 'phaser'
 
+import SinglePlayerArcadeGameScene from './scenes/SinglePlayerArcadeGameScene'
 import MatterTestScene from './scenes/MatterTestScene'
 import BootstrapScene from './scenes/BoostrapScene'
 import GameScene from './scenes/GameScene'
@@ -13,12 +14,12 @@ const config: Phaser.Types.Core.GameConfig = {
         default: 'arcade',
         arcade: {
             gravity: {
-                y: 0
+                y: 300
             },
             debug: true
         }
     },
-    scene: [BootstrapScene, GameScene, MatterTestScene]
+    scene: [BootstrapScene, GameScene, SinglePlayerArcadeGameScene, MatterTestScene]
 }
 
 export default new Phaser.Game(config)

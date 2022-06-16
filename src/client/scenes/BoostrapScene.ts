@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 
+import SinglePlayerArcadeGameScene from '../../client/scenes/SinglePlayerArcadeGameScene'
+import MatterTestScene from '../../client/scenes/MatterTestScene'
 import GameScene from '../../client/scenes/GameScene'
 import RoomClient from '../services/GameRoomClient'
 import Assets from '../assets/Assets'

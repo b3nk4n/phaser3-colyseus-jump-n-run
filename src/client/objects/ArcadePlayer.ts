@@ -6,7 +6,7 @@ import { IControls } from '~/shared/types/messages'
 /**
  * The player game object using composition.
  */
-export default class Player {
+export default class ArcadePlayer {
 
     private static readonly SPEED: number = 166
     private static readonly JUMP_SPEED: number = 300
@@ -34,11 +34,11 @@ export default class Player {
     public create(x: number, y: number): void {
         this._sprite = this.context.physics.add.sprite(x, y, Assets.PLAYER_IDLE)
             .setOrigin(1, 0.5)
-            .setCollideWorldBounds(true)
+            //.setCollideWorldBounds(true)
 
         const animContext = this.context.anims
         animContext.create({
-            key: Player.ANIM_RIGHT,
+            key: ArcadePlayer.ANIM_RIGHT,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_RUN_RIGHT, {
                 end: 5
             }),
@@ -46,7 +46,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_IDLE,
+            key: ArcadePlayer.ANIM_IDLE,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_IDLE, {
                 end: 9
             }),
@@ -54,7 +54,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_UP,
+            key: ArcadePlayer.ANIM_UP,
             frames: [{
                 key: Assets.PLAYER_JUMP_UP,
                 frame: 0
@@ -63,7 +63,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_DOWN,
+            key: ArcadePlayer.ANIM_DOWN,
             frames: [{
                 key: Assets.PLAYER_JUMP_DOWN,
                 frame: 0
@@ -72,7 +72,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_ATTACK,
+            key: ArcadePlayer.ANIM_ATTACK,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_ATTACK, {
                 end: 3
             }),
@@ -80,7 +80,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_DIZZY,
+            key: ArcadePlayer.ANIM_DIZZY,
             frames: [{
                 key: Assets.PLAYER_DIZZY,
                 frame: 0
@@ -89,7 +89,7 @@ export default class Player {
         })
 
         animContext.create({
-            key: Player.ANIM_DEAD,
+            key: ArcadePlayer.ANIM_DEAD,
             frames: [{
                 key: Assets.PLAYER_DEAD,
                 frame: 0
@@ -123,14 +123,14 @@ export default class Player {
         const movementFactor = touchGround ? 1.0 : 0.85
 
         if (controls.left) {
-            this._sprite.setVelocityX(-Player.SPEED * movementFactor)
+            this._sprite.setVelocityX(-ArcadePlayer.SPEED * movementFactor)
         } else if (controls.right) {
-            this._sprite.setVelocityX(Player.SPEED * movementFactor)
+            this._sprite.setVelocityX(ArcadePlayer.SPEED * movementFactor)
         } else {
             this.applyFrictionToPlayer(touchGround)
         }
         if (controls.up && touchGround) {
-            this._sprite.setVelocityY(-Player.JUMP_SPEED)
+            this._sprite.setVelocityY(-ArcadePlayer.JUMP_SPEED)
         }
     }
 
@@ -141,17 +141,17 @@ export default class Player {
 
     private updateAnimations(): void {
         if (this.dead) {
-            this.sprite.anims.play(Player.ANIM_DEAD)
+            this.sprite.anims.play(ArcadePlayer.ANIM_DEAD)
             return
         }
 
         if (this.dizzy) {
-            this.sprite.anims.play(Player.ANIM_DIZZY)
+            this.sprite.anims.play(ArcadePlayer.ANIM_DIZZY)
             return
         }
 
         const velocityX = this.sprite.body.velocity.x
-        const velocityY = this.sprite.body.velocity.y - Player.IDLE_VELOCITY_Y
+        const velocityY = this.sprite.body.velocity.y - ArcadePlayer.IDLE_VELOCITY_Y
 
         const isIdle = Math.abs(velocityX) < 25 && Math.abs(velocityY) < 25
         const isLeft = Math.sign(velocityX) === -1
@@ -161,26 +161,26 @@ export default class Player {
         this.sprite.flipX = isLeft
 
         if (this._attacking) {
-            this.sprite.anims.play(Player.ANIM_ATTACK, true)
+            this.sprite.anims.play(ArcadePlayer.ANIM_ATTACK, true)
             return
         }
 
         if (isIdle) {
-            this.sprite.anims.play(Player.ANIM_IDLE, true)
+            this.sprite.anims.play(ArcadePlayer.ANIM_IDLE, true)
             return
         }
 
         if (isJumpingUp) {
-            this.sprite.anims.play(Player.ANIM_UP)
+            this.sprite.anims.play(ArcadePlayer.ANIM_UP)
             return
         }
         if (isJumpingDown) {
-            this.sprite.anims.play(Player.ANIM_DOWN)
+            this.sprite.anims.play(ArcadePlayer.ANIM_DOWN)
             return
         }
 
         if (this.isTouchingGround()) {
-            this.sprite.anims.play(Player.ANIM_RIGHT, true)
+            this.sprite.anims.play(ArcadePlayer.ANIM_RIGHT, true)
         }
     }
 
