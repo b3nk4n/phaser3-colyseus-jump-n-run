@@ -1,27 +1,31 @@
 import Matter from 'matter-js'
 
 import { IPlatformDef } from '../../shared/types/commons'
+import Platform from '../objects/Platform'
 
-export default class MatterEnvironment {
+export default class LevelFactory {
+
+    private static readonly LEVEL: IPlatformDef[] = [
+        { x: 0.5, y: 0.28, isSmall: true },
+        { x: 0.175, y: 0.4, isSmall: true },
+        { x: 0.825, y: 0.4, isSmall: true },
+        { x: 0.5, y: 0.55, isSmall: false },
+        { x: 0.225, y: 0.75, isSmall: false },
+        { x: 0.775, y: 0.75, isSmall: false }
+    ]
+
     private readonly engine: Matter.Engine
 
     constructor(engine: Matter.Engine) {
         this.engine = engine
     }
 
-    create(platformDefs: IPlatformDef[], width: number, height: number): void {
-        const platforms: Body[] = []
-        platformDefs.forEach(platformDef =>
-            platforms.push(Matter.Bodies.rectangle(
-                width * platformDef.x, height * platformDef.y,
-                platformDef.isSmall ? 160 : 320, 32, {
-                    isStatic: true,
-                    isPlatform: true,
-                    isSmall: platformDef.isSmall
-                })
-            )
-        )
-        Matter.Composite.add(this.engine.world, platforms)
+    create(width: number, height: number): Body[] {
+        const bodies: Body[] = []
+        LevelFactory.LEVEL.forEach(platformDef => {
+            const platform = new Platform(width * platformDef.x, height * platformDef.y, platformDef.isSmall)
+            bodies.push(platform.body)
+        })
 
         const wallSize = 32;
         const worldBoundaryBodies = [
@@ -42,6 +46,7 @@ export default class MatterEnvironment {
                 isStatic: true
             })
         ]
-        Matter.Composite.add(this.engine.world, worldBoundaryBodies)
+        bodies.push(...worldBoundaryBodies)
+        return bodies
     }
 }

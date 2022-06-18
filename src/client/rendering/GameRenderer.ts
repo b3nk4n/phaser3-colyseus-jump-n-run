@@ -2,7 +2,6 @@ import Matter from 'matter-js'
 import Phaser from 'phaser'
 
 import GameController from '../controllers/GameController'
-import MapUtils from '../../shared/utils/MapUtils'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
@@ -13,8 +12,6 @@ export default class GameRenderer {
 
     private hud: Hud
 
-    private readonly diamondSprites: Map<number, Phaser.GameObjects.Sprite> = new Map<number, Phaser.GameObjects.Sprite>()
-
     constructor(context: Phaser.Scene, controller: GameController) {
         this.context = context
         this.controller = controller
@@ -22,56 +19,60 @@ export default class GameRenderer {
     }
 
     create(): void {
+        // create static objects
         this.context.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 
-        const bodies = Matter.Composite.allBodies(this.controller.world)
+        const bodies = this.controller.allBodies()
         bodies.forEach(body => {
             if (body.isPlatform) {
-                this.createPlatformSprite(body.position.x, body.position.y, body.isSmall)
-            }
-
-            if (body.isDiamond) {
-                const diamondSprite = this.createDiamondSprite(body.position.x, body.position.y, body.value > 10)
-                this.diamondSprites.set(body.id, diamondSprite)
+                this.addPlatformSprite(body)
             }
         })
 
         this.hud.create()
     }
 
-    update(): void {
+    public update(): void {
         this.hud.updateScore(this.controller.score)
 
-        this.updateDiamonds()
-    }
-
-    private updateDiamonds() {
-        for (const [key, diamond] of this.controller.diamonds.itemMap) {
-            const diamondSprite = MapUtils.computeIfAbsent(this.diamondSprites, key, k => {
-                return this.createDiamondSprite(0, 0, diamond.value > 10)
-            })
-
-            if (diamondSprite) {
-                diamondSprite.setPosition(diamond.body.position.x, diamond.body.position.y)
+        this.controller.allBodies().forEach(body => {
+            if (body.isStatic) {
+                return
             }
-        }
 
-        if (this.controller.diamonds.itemMap.size < this.diamondSprites.size) {
-            this.diamondSprites.forEach((diamondSprite, key) => {
-                if (this.controller.diamonds.itemMap.get(key) == null) {
-                    diamondSprite.destroy()
-                    this.diamondSprites.delete(key)
+            const sprite = this.context.children.getByName(body.idString) as Phaser.GameObjects.Sprite
+
+            if (body.data.markDelete) {
+                if (sprite != null) {
+                    this.context.children.remove(sprite)
                 }
-            })
+                return
+            }
+
+            if (body.isDiamond) {
+                this.updateDiamond(sprite, body)
+            }
+        })
+    }
+
+    private updateDiamond(sprite: Phaser.GameObjects.Sprite | null, body: Matter.Body): void {
+        if (sprite == null) {
+            this.addDiamondSprite(body)
+            return
         }
+        sprite.setPosition(body.position.x, body.position.y)
     }
 
-    private createPlatformSprite(x: number, y: number, isSmall: boolean): Phaser.GameObjects.Sprite {
-        return this.context.add.sprite(x, y, isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE)
+    private addPlatformSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
+        const asset = body.data.isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE
+        return this.context.add.sprite(body.position.x, body. position.y, asset)
+            .setName(body.idString)
     }
 
-    private createDiamondSprite(x: number, y: number, highValue: boolean) {
-        return this.context.add.sprite(x, y, highValue ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN)
+    private addDiamondSprite(body: Matter.Body) {
+        const asset = body.data.value > 10 ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN
+        return this.context.add.sprite(body.position.x, body. position.y, asset)
+            .setName(body.idString)
     }
 }

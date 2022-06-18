@@ -5,12 +5,11 @@ import { IControls } from '../../shared/types/commons'
 import GameRenderer from '../rendering/GameRenderer'
 import ArcadePlayer from '../objects/ArcadePlayer'
 import { TILE_SIZE } from '../../shared/constants'
-import Assets from '../assets/Assets'
 
 export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     public static readonly KEY: string = 'single-player-matter-game'
 
-    private player!: ArcadePlayer
+    //private player!: ArcadePlayer
     private bombs?: Phaser.Physics.Arcade.Group
 
     private readonly gameController: GameController
@@ -19,39 +18,27 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     constructor() {
         super(SinglePlayerMatterGameScene.KEY)
 
-        this.gameController = new GameController(this)
+        this.gameController = new GameController()
         this.gameRenderer = new GameRenderer(this, this.gameController)
     }
 
     create(): void {
-        this.gameController.create()
+        const { width, height } = this.scale
+        this.gameController.create(width, height)
         this.gameRenderer.create()
 
-        this.player = new ArcadePlayer(this)
-        this.player.create(100, this.scale.height - TILE_SIZE * 1.5)
-
-        this.startGame()
-    }
-
-    private startGame(): void {
-        this.gameController.startGame()
-
-        this.bombs = this.physics.add.group()
-        this.addBomb()
-
-        // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-        const playerBombCollider = this.physics.add.collider(this.player.sprite, this.bombs, this.onBombHit, () => {
-            this.physics.world.removeCollider(playerBombCollider)
-        }, this)
+        // this.player = new ArcadePlayer(this)
+        // this.player.create(100, this.scale.height - TILE_SIZE * 1.5)
     }
 
     update(time: number, delta: number): void {
         this.gameController.update(delta)
         this.gameRenderer.update()
+        this.gameController.cleanup()
 
         const controls = this.keyboardControls()
-        this.player.handleInput(controls)
-        this.player.update(time, delta)
+        // this.player.handleInput(controls)
+        // this.player.update(time, delta)
     }
 
     private keyboardControls(): IControls {
@@ -63,22 +50,5 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
             right: cursors.right.isDown,
             space: spaceKey.isDown
         }
-    }
-
-    private onBombHit(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-                      bomb: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody): void {
-        this.player.kill()
-    }
-
-    private addBomb(): void {
-        const halfWidth = this.scale.width / 2
-        const x = this.player.sprite.x < halfWidth
-            ? Phaser.Math.Between(halfWidth, 2 * halfWidth)
-            : Phaser.Math.Between(0, halfWidth)
-
-        this.bombs?.create(x, 16, Assets.BOMB)
-            .setBounce(1)
-            .setCollideWorldBounds(true)
-            .setVelocity(Phaser.Math.Between(-200, 200), 20)
     }
 }
