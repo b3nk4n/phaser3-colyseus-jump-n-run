@@ -43,7 +43,7 @@ export default class LevelFactory {
             }),
             // right
             Matter.Bodies.rectangle(width + wallSize / 2, height / 2, wallSize, height, {
-                isStatic: true
+                isStatic: true,
             })
         ]
         bodies.push(...worldBoundaryBodies)

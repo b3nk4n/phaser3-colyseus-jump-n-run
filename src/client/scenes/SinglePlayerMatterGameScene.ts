@@ -32,13 +32,11 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.gameController.update(delta)
+        const controls = this.keyboardControls()
+
+        this.gameController.update(delta, controls)
         this.gameRenderer.update()
         this.gameController.cleanup()
-
-        const controls = this.keyboardControls()
-        // this.player.handleInput(controls)
-        // this.player.update(time, delta)
     }
 
     private keyboardControls(): IControls {

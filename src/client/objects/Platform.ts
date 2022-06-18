@@ -17,10 +17,6 @@ export default class Platform {
         this._body.idString = '' + this._body.id
     }
 
-    get id() {
-        return this._body.id
-    }
-
     get body() {
         return this._body
     }

@@ -112,7 +112,7 @@ export default class ArcadePlayer {
             return
         }
 
-        const touchGround = this.isTouchingGround()
+        const touchGround = this.isTouchingGround
 
         this._attacking = controls.space;
         if (this._attacking) {
@@ -179,7 +179,7 @@ export default class ArcadePlayer {
             return
         }
 
-        if (this.isTouchingGround()) {
+        if (this.isTouchingGround) {
             this.sprite.anims.play(ArcadePlayer.ANIM_RIGHT, true)
         }
     }
@@ -195,7 +195,7 @@ export default class ArcadePlayer {
         this._dead = true
     }
 
-    public isTouchingGround() {
+    get isTouchingGround() {
         return this._sprite.body.touching.down
     }
 
