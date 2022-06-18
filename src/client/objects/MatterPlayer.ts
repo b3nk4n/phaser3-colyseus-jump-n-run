@@ -11,6 +11,7 @@ export default class MatterPlayer {
     private _attacking: boolean = false
     private _dizzyCountdown: number = 0
     private _dead: boolean = false
+    private _touchingGround = false
 
     constructor(x: number, y: number) {
         this._body = Matter.Bodies.rectangle(x, y, 32, 32, {
@@ -49,6 +50,14 @@ export default class MatterPlayer {
         Matter.Body.setVelocity(this.body, { x: newX, y: newY })
     }
 
+    public touchGround(): void {
+        this._touchingGround = true
+    }
+
+    public releaseGround(): void {
+        this._touchingGround = false
+    }
+
     public punch(): void {
         if (!this.dizzy) {
             this._dizzyCountdown = 2500
@@ -64,7 +73,7 @@ export default class MatterPlayer {
     }
 
     get canJump() {
-        return true
+        return this._touchingGround
     }
 
     get body() {

@@ -29,19 +29,41 @@ export default class GameController {
 
         Matter.Events.on(this.engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
-                const p = bodyA.isPlayer ? bodyA : bodyB
-                const d = bodyA.isDiamond ? bodyA : bodyB
-                if (p.isPlayer && d.isDiamond) {
-                    this.onDiamondPlayerCollision(d)
+                const player = bodyA.isPlayer ? bodyA : bodyB
+                const diamond = bodyA.isDiamond ? bodyA : bodyB
+                const ground = bodyA.isStatic ? bodyA : bodyB
+                if (player.isPlayer && diamond.isDiamond) {
+                    this.onPlayerDiamondCollisionStart(diamond)
+                }
+                if (player.isPlayer && ground.isStatic) {
+                    this.onPlayerGroundCollisionStart(player)
+                }
+            });
+        });
+
+        Matter.Events.on(this.engine, 'collisionEnd', ({ pairs }) => {
+            pairs.forEach(({ bodyA, bodyB }) => {
+                const player = bodyA.isPlayer ? bodyA : bodyB
+                const ground = bodyA.isStatic ? bodyA : bodyB
+                if (player.isPlayer && ground.isStatic) {
+                    this.onPlayerGroundCollisionEnd(player)
                 }
             });
         });
     }
 
-    private onDiamondPlayerCollision(diamond: Matter.Body): void {
+    private onPlayerDiamondCollisionStart(diamond: Matter.Body): void {
         this._score += diamond.data.value
         this.activeDiamonds--
         diamond.data.markDelete = true
+    }
+
+    private onPlayerGroundCollisionStart(player: Matter.Body): void {
+        player.data.touchGround()
+    }
+
+    private onPlayerGroundCollisionEnd(player: Matter.Body): void {
+        player.data.releaseGround()
     }
 
     public startGame(): void {
