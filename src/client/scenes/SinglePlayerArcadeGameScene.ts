@@ -14,6 +14,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
     private diamonds?: Phaser.Physics.Arcade.Group
     private bombs?: Phaser.Physics.Arcade.Group
 
+    private level: number = 0
     private score: number = 0
     private hud?: Hud
 
@@ -132,6 +133,9 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         this.hud?.updateScore(this.score)
 
         if (this.diamonds?.countActive(true) === 0) {
+            this.level++
+            this.hud?.updateLevel(this.level)
+
             this.diamonds.children.iterate((child) => {
                 // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
                 child.enableBody(true, child.x, 0, true, true)

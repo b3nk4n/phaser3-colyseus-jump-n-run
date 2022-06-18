@@ -112,6 +112,7 @@ export default class GameRenderer {
 
     public update(): void {
         this.hud.updateScore(this.controller.score)
+        this.hud.updateLevel(this.controller.level)
 
         this.controller.allBodies().forEach(body => {
             if (body.isStatic) {

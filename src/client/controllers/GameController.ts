@@ -15,6 +15,7 @@ export default class GameController {
 
     private activeDiamonds: number = 0
     private _score: number = 0
+    private _level: number = 0
 
     constructor() {
         this.engine = Matter.Engine.create()
@@ -74,6 +75,7 @@ export default class GameController {
 
     public update(delta: number, controls: IControls): void {
         if (this.activeDiamonds == 0) {
+            this._level++
             this.startGame()
             return
         }
@@ -110,5 +112,9 @@ export default class GameController {
 
     get score() {
         return this._score
+    }
+
+    get level() {
+        return this._level
     }
 }
