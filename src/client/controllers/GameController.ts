@@ -1,5 +1,4 @@
 import Matter from 'matter-js'
-import Phaser from 'phaser'
 
 import { IControls } from '../../shared/types/commons'
 import LevelFactory from '../factories/LevelFactory'
@@ -47,8 +46,7 @@ export default class GameController {
 
     public startGame(): void {
         for (let i = 0; i < 15; ++i) {
-            const rnd = Phaser.Math.RND.frac()
-            this.addDiamond(32 + i * 64, 16, rnd > 0.75)
+            this.addDiamond(32 + i * 64, 16)
         }
     }
 
@@ -77,8 +75,8 @@ export default class GameController {
         return player
     }
 
-    public addDiamond(x: number, y: number, highValue: boolean): Diamond {
-        const diamond = new Diamond(x, y, highValue ? Diamond.VALUE_RED : Diamond.VALUE_GREEN)
+    public addDiamond(x: number, y: number): Diamond {
+        const diamond = new Diamond(x, y)
         Matter.Composite.add(this.engine.world, diamond.body)
         this.activeDiamonds++
         return diamond

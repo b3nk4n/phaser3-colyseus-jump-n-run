@@ -151,7 +151,7 @@ export default class GameRenderer {
         }
         sprite.setPosition(body.position.x, body.position.y)
 
-        const { dead, dizzy, attacking, canJump } = body.data
+        const { dead, dizzy, attacking, canJump, facingLeft } = body.data
         if (dead) {
             sprite.anims.play(GameRenderer.ANIM_DEAD)
             return
@@ -166,11 +166,10 @@ export default class GameRenderer {
         const velocityY = body.velocity.y
 
         const isIdle = Math.abs(velocityX) < GameRenderer.IDLE_VELOCITY_EPSILON && Math.abs(velocityY) < GameRenderer.IDLE_VELOCITY_EPSILON
-        const isLeft = Math.sign(velocityX) === -1
         const isJumpingUp = velocityY <= -GameRenderer.IDLE_VELOCITY_EPSILON
         const isJumpingDown = velocityY >= GameRenderer.IDLE_VELOCITY_EPSILON
 
-        sprite.flipX = isLeft
+        sprite.flipX = facingLeft
 
         if (attacking) {
             sprite.anims.play(GameRenderer.ANIM_ATTACK, true)

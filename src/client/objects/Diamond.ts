@@ -1,5 +1,4 @@
 import Matter from 'matter-js'
-import Phaser from 'phaser'
 
 export default class Diamond {
 
@@ -10,11 +9,11 @@ export default class Diamond {
     private readonly _value: number
     private _markDelete: boolean = false
 
-    constructor(x: number, y: number, value: number) {
-        this._value = value
+    constructor(x: number, y: number) {
+        this._value = Math.random() > 0.75 ? Diamond.VALUE_RED : Diamond.VALUE_GREEN
         this._body = Matter.Bodies.rectangle(x, y, 16, 16, {
             inertia: Infinity,
-            restitution: Phaser.Math.FloatBetween(0.8, 0.95),
+            restitution: Math.random() * (0.95 - 0.8) + 0.8,
             isDiamond: true,
             data: this
         })

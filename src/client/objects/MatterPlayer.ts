@@ -7,6 +7,7 @@ export default class MatterPlayer {
     private readonly _body: Matter.Body
     private _markDelete: boolean = false
 
+    private _facingLeft: boolean = false
     private _attacking: boolean = false
     private _dizzyCountdown: number = 0
     private _dead: boolean = false
@@ -31,9 +32,11 @@ export default class MatterPlayer {
         let newY = vy
 
         if (right && !left) {
+            this._facingLeft = false
             newX = 3
         }
         if (left && !right) {
+            this._facingLeft = true
             newX = -3
         }
 
@@ -54,6 +57,10 @@ export default class MatterPlayer {
 
     public kill(): void {
         this._dead = true
+    }
+
+    get facingLeft(): boolean {
+        return this._facingLeft
     }
 
     get canJump() {
