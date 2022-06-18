@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 
-import GameController from '../controller/GameController'
+import GameController from '../controllers/GameController'
 import { IControls } from '../../shared/types/commons'
 import GameRenderer from '../rendering/GameRenderer'
 import ArcadePlayer from '../objects/ArcadePlayer'
@@ -11,10 +11,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     public static readonly KEY: string = 'single-player-matter-game'
 
     private player!: ArcadePlayer
-    private diamonds?: Phaser.Physics.Arcade.Group
     private bombs?: Phaser.Physics.Arcade.Group
-
-    private score: number = 0
 
     private readonly gameController: GameController
     private readonly gameRenderer: GameRenderer
@@ -37,13 +34,10 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     }
 
     private startGame(): void {
-        this.diamonds = this.createDiamonds()
+        this.gameController.startGame()
 
         this.bombs = this.physics.add.group()
         this.addBomb()
-
-        // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-        this.physics.add.overlap(this.player.sprite, this.diamonds, this.onCollectDiamond, undefined, this)
 
         // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
         const playerBombCollider = this.physics.add.collider(this.player.sprite, this.bombs, this.onBombHit, () => {
@@ -51,28 +45,9 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
         }, this)
     }
 
-    private createDiamonds(): Phaser.Physics.Arcade.Group {
-        const diamonds = this.physics.add.group()
-
-        for (let i = 0; i < 15; ++i) {
-            const isRed = Phaser.Math.RND.frac() > 0.75
-            diamonds.create(32 + i * 64, 0, isRed ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN)
-                .setData({
-                    value: isRed ? 15 : 10
-                })
-                .setBounceY(Phaser.Math.FloatBetween(0.8, 0.99))
-                .setCollideWorldBounds(true)
-        }
-
-        return diamonds
-    }
-
     update(time: number, delta: number): void {
         this.gameController.update(delta)
         this.gameRenderer.update()
-
-        const cursors = this.input.keyboard.createCursorKeys()
-        const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
         const controls = this.keyboardControls()
         this.player.handleInput(controls)
@@ -87,22 +62,6 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
             left: cursors.left.isDown,
             right: cursors.right.isDown,
             space: spaceKey.isDown
-        }
-    }
-
-    private onCollectDiamond(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-                             diamond: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
-        diamond.disableBody(true, true)
-        const diamondValue = diamond.getData('value')
-        this.score += diamondValue
-
-        if (this.diamonds?.countActive(true) === 0) {
-            this.diamonds.children.iterate((child) => {
-                // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
-                child.enableBody(true, child.x, 0, true, true)
-            })
-
-            this.addBomb()
         }
     }
 

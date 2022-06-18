@@ -4,20 +4,16 @@ import { IPlatformDef } from '../../shared/types/commons'
 
 export default class MatterEnvironment {
     private readonly engine: Matter.Engine
-    private readonly width: number
-    private readonly height: number
 
-    constructor(engine: Matter.Engine, width: number, height: number) {
+    constructor(engine: Matter.Engine) {
         this.engine = engine
-        this.width = width
-        this.height = height
     }
 
-    create(platformDefs: IPlatformDef[]): void {
+    create(platformDefs: IPlatformDef[], width: number, height: number): void {
         const platforms: Body[] = []
         platformDefs.forEach(platformDef =>
             platforms.push(Matter.Bodies.rectangle(
-                this.width * platformDef.x, this.height * platformDef.y,
+                width * platformDef.x, height * platformDef.y,
                 platformDef.isSmall ? 160 : 320, 32, {
                     isStatic: true,
                     isPlatform: true,
@@ -30,19 +26,19 @@ export default class MatterEnvironment {
         const wallSize = 32;
         const worldBoundaryBodies = [
             // top
-            Matter.Bodies.rectangle(this.width / 2, -wallSize / 2, this.width, wallSize, {
+            Matter.Bodies.rectangle(width / 2, -wallSize / 2, width, wallSize, {
                 isStatic: true
             }),
             // bottom
-            Matter.Bodies.rectangle(this.width / 2, this.height - wallSize / 2, this.width, wallSize, {
+            Matter.Bodies.rectangle(width / 2, height - wallSize / 2, width, wallSize, {
                 isStatic: true
             }),
             // left
-            Matter.Bodies.rectangle(0 - wallSize / 2, this.height / 2, wallSize, this.height, {
+            Matter.Bodies.rectangle(0 - wallSize / 2, height / 2, wallSize, height, {
                 isStatic: true
             }),
             // right
-            Matter.Bodies.rectangle(this.width + wallSize / 2, this.height / 2, wallSize, this.height, {
+            Matter.Bodies.rectangle(width + wallSize / 2, height / 2, wallSize, height, {
                 isStatic: true
             })
         ]

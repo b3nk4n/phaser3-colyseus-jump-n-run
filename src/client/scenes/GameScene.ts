@@ -2,10 +2,10 @@ import Phaser from 'phaser'
 
 import RoomClient, { IPositionUpdate } from '../services/GameRoomClient'
 import { IGameState, GamePhase } from '../../server/schema/GameState'
+import { IControls } from '../../shared/types/commons'
 import { IPlayer } from '../../server/schema/Player'
-import { IControls } from '~/shared/types/messages'
+import ArcadePlayer from '../objects/ArcadePlayer'
 import Level from '../../server/schema/Level'
-import Player from '../objects/Player'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
@@ -15,15 +15,16 @@ export interface IGameSceneData {
 
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
-    public static readonly TILE_SIZE: number = 32
 
     private roomClient?: RoomClient
 
-    private player!: Player
-    private otherPlayers: Player[] = []
+    private player!: ArcadePlayer
+    private otherPlayers: ArcadePlayer[] = []
     private platforms?: Phaser.Physics.Arcade.StaticGroup
     private diamonds?: Phaser.Physics.Arcade.Group
     private bombs?: Phaser.Physics.Arcade.Group
+
+    private score: number = 0
     private hud?: Hud
 
     private activeControls: IControls = {
@@ -52,10 +53,16 @@ export default class GameScene extends Phaser.Scene {
 
     private currentPlayerPositionUpdated(p: IPositionUpdate) {
         if (p.x) {
-            this.player.sprite.x = p.x
+            this.player.sprite.body.position.x = p.x
         }
         if (p.y) {
-            this.player.sprite.y = p.y
+            this.player.sprite.body.position.y = p.y
+        }
+        if (p.velocityX) {
+            this.player.sprite.body.velocity.x = p.velocityX
+        }
+        if (p.velocityY) {
+            this.player.sprite.body.velocity.y = p.velocityY
         }
     }
 
@@ -64,10 +71,16 @@ export default class GameScene extends Phaser.Scene {
         const otherPlayer = this.otherPlayers[0]
 
         if (p.x) {
-            otherPlayer.sprite.x = p.x
+            otherPlayer.sprite.body.position.x = p.x
         }
         if (p.y) {
-            otherPlayer.sprite.y = p.y
+            otherPlayer.sprite.body.position.y = p.y
+        }
+        if (p.velocityX) {
+            otherPlayer.sprite.body.velocity.x = p.velocityX
+        }
+        if (p.velocityY) {
+            otherPlayer.sprite.body.velocity.y = p.velocityY
         }
     }
 
@@ -76,7 +89,7 @@ export default class GameScene extends Phaser.Scene {
 
         const sessionId = this.roomClient?.sessionId
         this.roomClient?.players.forEach(p => {
-            const player = new Player(this)
+            const player = new ArcadePlayer(this)
             player.create(p.x, p.y)
             if (p.id === sessionId) {
                 this.player = player
@@ -97,7 +110,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private otherPlayerJoined(player: IPlayer) {
-        const p = new Player(this)
+        const p = new ArcadePlayer(this)
         p.create(player.x, player.y)
         this.otherPlayers.push(p)
     }
@@ -172,9 +185,10 @@ export default class GameScene extends Phaser.Scene {
             this.activeControls.right = cursors.right.isDown
             this.activeControls.space = spaceKey.isDown
 
+            this.player.handleInput(this.activeControls)
             this.player.update(time, delta)
 
-            this.roomClient.sendPlayerControls(this.activeControls)
+            //this.roomClient.sendPlayerControls(this.activeControls)
         }
     }
 
@@ -186,11 +200,11 @@ export default class GameScene extends Phaser.Scene {
 
     private handlePhaseChanged(phase: GamePhase) {
         if (phase === GamePhase.WAITING_FOR_OPPONENT) {
-            this.hud?.updateStatus('Waiting for opponent...')
+            this.hud?.showMessage('Waiting for opponent...')
         } else if (phase === GamePhase.READY) {
-            this.hud?.updateStatus('Press SPACE to start!')
+            this.hud?.showMessage('Press SPACE to start!')
         } else if (phase === GamePhase.PLAYING) {
-            this.hud?.clearStatus()
+            this.hud?.clearMessage()
             this.startGame()
         }
     }
@@ -199,7 +213,8 @@ export default class GameScene extends Phaser.Scene {
                              diamond: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
         diamond.disableBody(true, true)
         const diamondValue = diamond.getData('value')
-        this.hud?.updateScore(diamondValue)
+        this.score += diamondValue
+        this.hud?.updateScore(this.score)
 
         if (this.diamonds?.countActive(true) === 0) {
             this.diamonds.children.iterate((child) => {

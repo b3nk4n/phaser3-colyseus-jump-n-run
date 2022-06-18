@@ -2,12 +2,15 @@ import { Client, Room } from 'colyseus.js'
 import Phaser from 'phaser'
 
 import GameState, { IGameState, GamePhase } from '../../server/schema/GameState'
-import { IControls, Message } from '../../shared/types/messages'
 import Player, { IPlayer } from '../../server/schema/Player'
+import { IControls } from '../../shared/types/commons'
+import { Message } from '../../shared/types/messages'
 
 export interface IPositionUpdate {
     x?: number,
-    y?: number
+    y?: number,
+    velocityX?: number,
+    velocityY?: number
 }
 
 export default class RoomClient {
@@ -42,17 +45,21 @@ export default class RoomClient {
 
         this.room.state.players.onAdd = (player: Player, idx) => {
             player.onChange = (changes) => {
-                let x
-                let y
+                let x, y
+                let velocityX, velocityY
                 for (const change of changes) {
                     if (change.field === 'x') {
                         x = change.value
                     } else if (change.field === 'y') {
                         y = change.value
+                    } else if (change.field === 'velocityX') {
+                        velocityX = change.value
+                    } else if (change.field === 'velocityY') {
+                        velocityY = change.value
                     }
                 }
 
-                this.events.emit(RoomClient.EVENT_PLAYER_POSITION_UPDATED, {x, y}, idx)
+                this.events.emit(RoomClient.EVENT_PLAYER_POSITION_UPDATED, { x, y, velocityX, velocityY}, idx)
             }
 
             this.events.emit(RoomClient.EVENT_PLAYER_ADDED, player)

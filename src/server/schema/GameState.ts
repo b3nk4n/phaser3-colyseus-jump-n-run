@@ -37,8 +37,8 @@ export default class GameState extends Schema implements IGameState {
     @type([Diamond])
     diamonds: ArraySchema<Diamond> = new ArraySchema<Diamond>()
 
-    addPlayer(id: string, x: number): Player {
-        const player = new Player(id, 10, 10)
+    addPlayer(id: string, playerIdx: number): Player {
+        const player = new Player(id, playerIdx * 10, 10)
         this.players.push(player)
         return player
     }
