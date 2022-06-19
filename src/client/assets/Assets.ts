@@ -50,10 +50,18 @@ export default class Assets {
             'assets/player_punch_4.png',
             {
                 frameWidth: 32,
-                frameHeight: 32
+                frameHeight: 32,
             }
         )
-        loader.image(Assets.PLAYER_DIZZY, 'assets/player_dizzy.png')
-        loader.image(Assets.PLAYER_DEAD, 'assets/player_dead.png')
+        loader.spritesheet(Assets.PLAYER_DIZZY, 'assets/player_dizzy_m1.png', {
+            frameWidth: 32,
+            frameHeight: 32,
+            margin: 1
+        })
+        loader.spritesheet(Assets.PLAYER_DEAD, 'assets/player_dead_m1.png', {
+            frameWidth: 32,
+            frameHeight: 32,
+            margin: 1 // resolve rendering glitch of horizontal line at the top edge
+        })
     }
 }
