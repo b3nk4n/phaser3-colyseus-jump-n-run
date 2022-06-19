@@ -191,7 +191,7 @@ export default class ArcadePlayer {
     }
 
     public kill(): void {
-        this.sprite.setTint(0xffcccc)
+        this.sprite.setTint(0xffaaaa)
         this._dead = true
     }
 

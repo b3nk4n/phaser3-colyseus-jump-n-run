@@ -1,25 +1,21 @@
 import Matter from 'matter-js'
 
-import { randomBetween } from '../../shared/randomUtils'
-
-export default class Diamond {
-
-    public static readonly VALUE_RED = 25
-    public static readonly VALUE_GREEN = 10
+export default class Bomb {
 
     private readonly _body: Matter.Body
-    private readonly _value: number
     private _markDelete: boolean = false
 
     constructor(x: number, y: number) {
-        this._value = Math.random() > 0.75 ? Diamond.VALUE_RED : Diamond.VALUE_GREEN
         this._body = Matter.Bodies.rectangle(x, y, 16, 16, {
             inertia: Infinity,
-            restitution: randomBetween(0.8, 0.95),
+            restitution: 1.0,
+            friction: 0,
+            frictionAir: 0,
+            frictionStatic: 0,
             collisionFilter: {
                 group: -2
             },
-            isDiamond: true,
+            isBomb: true,
             data: this
         })
         this._body.idString = '' + this._body.id
@@ -27,10 +23,6 @@ export default class Diamond {
 
     get body() {
         return this._body
-    }
-
-    get value() {
-        return this._value
     }
 
     get markDelete() {

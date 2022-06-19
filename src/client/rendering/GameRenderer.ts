@@ -134,6 +134,9 @@ export default class GameRenderer {
             if (body.isPlayer) {
                 this.updatePlayer(sprite, body)
             }
+            if (body.isBomb) {
+                this.updateBomb(sprite, body)
+            }
         })
     }
 
@@ -155,13 +158,17 @@ export default class GameRenderer {
         const { dead, dizzy, attacking, canJump, facingLeft } = body.data
         if (dead) {
             sprite.anims.play(GameRenderer.ANIM_DEAD)
+            sprite.setTint(0xffaaaa)
             return
         }
 
         if (dizzy) {
+            sprite.setTint(0xffcccc)
             sprite.anims.play(GameRenderer.ANIM_DIZZY)
             return
         }
+
+        sprite.setTint(0xffffff)
 
         const velocityX = body.velocity.x
         const velocityY = body.velocity.y
@@ -196,6 +203,14 @@ export default class GameRenderer {
         }
     }
 
+    private updateBomb(sprite: Phaser.GameObjects.Sprite | null, body: Matter.Body): void {
+        if (sprite == null) {
+            this.addBombSprite(body)
+            return
+        }
+        sprite.setPosition(body.position.x, body.position.y)
+    }
+
     private addPlatformSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
         const asset = body.data.isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE
         return this.context.add.sprite(body.position.x, body. position.y, asset)
@@ -210,6 +225,11 @@ export default class GameRenderer {
 
     private addPlayerSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
         return this.context.add.sprite(body.position.x, body. position.y, Assets.PLAYER_IDLE)
+            .setName(body.idString)
+    }
+
+    private addBombSprite(body: Matter.Body) {
+        return this.context.add.sprite(body.position.x, body. position.y, Assets.BOMB)
             .setName(body.idString)
     }
 }

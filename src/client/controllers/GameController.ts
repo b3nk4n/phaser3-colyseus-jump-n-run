@@ -1,15 +1,19 @@
 import Matter from 'matter-js'
 
+import { randomBetween } from '../../shared/randomUtils'
 import { IControls } from '../../shared/types/commons'
 import LevelFactory from '../factories/LevelFactory'
 import MatterPlayer from '../objects/MatterPlayer'
 import { TILE_SIZE } from '../../shared/constants'
 import Diamond from '../objects/Diamond'
+import Bomb from '../objects/Bomb'
 
 export default class GameController {
 
     private readonly engine: Matter.Engine
     private readonly levelFactory: LevelFactory
+
+    private width!: number
 
     private player!: MatterPlayer
 
@@ -23,6 +27,7 @@ export default class GameController {
     }
 
     create(width: number, height: number): void {
+        this.width = width
         const envBodies = this.levelFactory.create(width, height)
         Matter.Composite.add(this.engine.world, envBodies)
 
@@ -33,11 +38,16 @@ export default class GameController {
                 const player = bodyA.isPlayer ? bodyA : bodyB
                 const diamond = bodyA.isDiamond ? bodyA : bodyB
                 const ground = bodyA.isStatic ? bodyA : bodyB
+                const bomb = bodyA.isBomb ? bodyA : bodyB
+
                 if (player.isPlayer && diamond.isDiamond) {
                     this.onPlayerDiamondCollisionStart(diamond)
                 }
                 if (player.isPlayer && ground.isStatic) {
                     this.onPlayerGroundCollisionStart(player)
+                }
+                if (player.isPlayer && bomb.isBomb) {
+                    this.onPlayerBombCollisionStart(player)
                 }
             });
         });
@@ -67,10 +77,16 @@ export default class GameController {
         player.data.releaseGround()
     }
 
+    private onPlayerBombCollisionStart(player: Matter.Body): void {
+        player.data.kill()
+    }
+
     public startGame(): void {
         for (let i = 0; i < 15; ++i) {
             this.addDiamond(32 + i * 64, 16)
         }
+
+        this.addBomb()
     }
 
     public update(delta: number, controls: IControls): void {
@@ -81,6 +97,7 @@ export default class GameController {
         }
 
         this.player.handleControls(controls)
+        this.player.update(delta)
 
         Matter.Engine.update(this.engine, delta)
     }
@@ -104,6 +121,29 @@ export default class GameController {
         Matter.Composite.add(this.engine.world, diamond.body)
         this.activeDiamonds++
         return diamond
+    }
+
+    public addBomb(): Bomb {
+        const x = randomBetween(TILE_SIZE, this.width - TILE_SIZE)
+        const bomb = new Bomb(x, TILE_SIZE / 2)
+        const directionFactor = Math.random() > 0.5 ? 1 : -1;
+        Matter.Body.applyForce(bomb.body, bomb.body.position, {
+            x: directionFactor * 0.005,
+            y: 0.005
+        })
+        this.disableGravityFor(bomb.body)
+        Matter.Composite.add(this.engine.world, bomb.body)
+        return bomb
+    }
+
+    private disableGravityFor(body: Matter.Body): void {
+        const gravity = this.engine.world.gravity
+        Matter.Events.on(this.engine, 'beforeUpdate', function() {
+            Matter.Body.applyForce(body, body.position, {
+                x: -gravity.x * gravity.scale * body.mass,
+                y: -gravity.y * gravity.scale * body.mass
+            });
+        });
     }
 
     public allBodies(): Matter.Body[] {

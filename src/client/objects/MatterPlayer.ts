@@ -25,9 +25,20 @@ export default class MatterPlayer {
         this._body.idString = '' + this._body.id
     }
 
+    public update(delta: number): void {
+        if (this._dizzyCountdown > 0) {
+            this._dizzyCountdown -= delta
+        }
+    }
+
     public handleControls(controls: IControls) {
         const { left, up, right, space } = controls
         const { x: vx, y: vy } = this.body.velocity
+
+        if (this.dead || this.dizzy) {
+            this._attacking = false
+            return
+        }
 
         let newX = vx
         let newY = vy
