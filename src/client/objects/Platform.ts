@@ -1,24 +1,37 @@
 import Matter from 'matter-js'
-import Phaser from 'phaser'
 
 export default class Platform {
 
-    private readonly _body: Matter.Body
+    private readonly surfaceBody: Matter.Body
+    private readonly outerSlideBody: Matter.Body
     private readonly _isSmall: boolean
     private _markDelete: boolean = false
 
     constructor(x: number, y: number, isSmall: boolean) {
         this._isSmall = isSmall
-        this._body = Matter.Bodies.rectangle(x, y, isSmall ? 160 : 320, 32, {
+
+        const bodyOptions = {
             isStatic: true,
             isPlatform: true,
             data: this
-        })
-        this._body.idString = '' + this._body.id
+        }
+
+        const padding = 4;
+        const platformWidth = isSmall ? 160 : 320
+
+        this.surfaceBody = Matter.Bodies.rectangle(x, y, platformWidth - 2 * padding, 32, bodyOptions)
+        this.surfaceBody.idString = '' + this.surfaceBody.id
+
+        this.outerSlideBody = Matter.Bodies.rectangle(x, y, platformWidth, 32, bodyOptions)
+        this.outerSlideBody.friction = 0
+        this.outerSlideBody.idString = '' + this.outerSlideBody.id
     }
 
-    get body() {
-        return this._body
+    get bodies() {
+        return [
+            this.surfaceBody,
+            this.outerSlideBody
+        ]
     }
 
     get isSmall() {

@@ -24,7 +24,7 @@ export default class LevelFactory {
         const bodies: Body[] = []
         LevelFactory.LEVEL.forEach(platformDef => {
             const platform = new Platform(width * platformDef.x, height * platformDef.y, platformDef.isSmall)
-            bodies.push(platform.body)
+            bodies.push(...platform.bodies)
         })
 
         const bodyOptions = {
