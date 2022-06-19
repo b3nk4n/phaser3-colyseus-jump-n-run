@@ -6,6 +6,7 @@ import SinglePlayerMatterGameScene from './scenes/SinglePlayerMatterGameScene'
 import MatterTestScene from './scenes/MatterTestScene'
 import BootstrapScene from './scenes/BoostrapScene'
 import GameScene from './scenes/GameScene'
+import MenuScene from './scenes/MenuScene'
 
 export const DEBUG_MODE: boolean = true
 
@@ -24,6 +25,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
     scene: [
         BootstrapScene,
+        MenuScene,
         GameScene,
         SinglePlayerArcadeGameScene,
         SinglePlayerMatterGameScene,

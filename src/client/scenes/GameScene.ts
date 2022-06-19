@@ -9,7 +9,7 @@ import Level from '../../server/schema/Level'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
-export interface IGameSceneData {
+export interface ISceneData {
     roomClient: RoomClient
 }
 
@@ -38,7 +38,7 @@ export default class GameScene extends Phaser.Scene {
         super(GameScene.KEY)
     }
 
-    async create(data: IGameSceneData): Promise<void> {
+    async create(data: ISceneData): Promise<void> {
         this.roomClient = data.roomClient
 
         if (!this.roomClient) {

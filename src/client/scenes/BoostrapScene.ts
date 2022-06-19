@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 
-import SinglePlayerMatterGameScene from '../../client/scenes/SinglePlayerMatterGameScene'
-import RoomClient from '../services/GameRoomClient'
+import MenuScene from '../../client/scenes/MenuScene'
 import Assets from '../assets/Assets'
 
 export default class BoostrapScene extends Phaser.Scene {
@@ -9,15 +8,13 @@ export default class BoostrapScene extends Phaser.Scene {
 
     private assets: Assets
 
-    private roomClient!: RoomClient
-
     constructor() {
         super(BoostrapScene.KEY)
         this.assets = new Assets(this)
     }
 
     init(): void {
-        this.roomClient = new RoomClient()
+
     }
 
     preload(): void {
@@ -25,8 +22,6 @@ export default class BoostrapScene extends Phaser.Scene {
     }
 
     create(): void {
-        this.scene.launch(SinglePlayerMatterGameScene.KEY, {
-            roomClient: this.roomClient
-        })
+        this.scene.launch(MenuScene.KEY)
     }
 }
