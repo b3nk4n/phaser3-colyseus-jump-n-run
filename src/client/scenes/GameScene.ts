@@ -9,10 +9,6 @@ import Level from '../../server/schema/Level'
 import Assets from '../assets/Assets'
 import Hud from '../ui/Hud'
 
-export interface ISceneData {
-    roomClient: RoomClient
-}
-
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
 
@@ -38,8 +34,8 @@ export default class GameScene extends Phaser.Scene {
         super(GameScene.KEY)
     }
 
-    async create(data: ISceneData): Promise<void> {
-        this.roomClient = data.roomClient
+    async create(): Promise<void> {
+        this.roomClient = new RoomClient()
 
         if (!this.roomClient) {
             throw new Error('Server connection is not available')

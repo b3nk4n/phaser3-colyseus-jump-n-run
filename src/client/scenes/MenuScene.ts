@@ -3,15 +3,16 @@ import Phaser from 'phaser'
 import SinglePlayerMatterGameScene from './SinglePlayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './SinglePlayerArcadeGameScene'
 import RoomClient from '../services/GameRoomClient'
+import GameScene from '../scenes/GameScene'
+import TextButton from '../ui/TextButton'
 import Assets from '../assets/Assets'
 
 export default class MenuScene extends  Phaser.Scene {
     public static readonly KEY: string = 'menu'
-    private static readonly EVENT_SELECTED = 'selected';
 
     private keys!: any
 
-    private buttons: Phaser.GameObjects.Image[] = []
+    private buttons: TextButton[] = []
     private selectedButtonIndex: number = 0
 
     constructor() {
@@ -35,30 +36,26 @@ export default class MenuScene extends  Phaser.Scene {
         this.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 
-        const playArcadeButton = this.add.image(width * 0.5, height * 0.45, Assets.BUTTON)
-        playArcadeButton.on(MenuScene.EVENT_SELECTED, () => {
-            this.scene.start(SinglePlayerArcadeGameScene.KEY)
-        }, this)
-        this.add.text(playArcadeButton.x, playArcadeButton.y, 'Single Player: Arcade')
-            .setOrigin(0.5)
+        this.add.text(width * 0.5, height * 0.2, 'Select Mode', {
+            fontSize: '48px'
+        }).setOrigin(0.5)
 
-        const playMatterButton = this.add.image(playArcadeButton.x, playArcadeButton.y + playArcadeButton.displayHeight + 16, Assets.BUTTON)
-        playMatterButton.on(MenuScene.EVENT_SELECTED, () => {
-            this.scene.start(SinglePlayerMatterGameScene.KEY, {
-                roomClient: new RoomClient()
-            })
-        }, this)
-        this.add.text(playMatterButton.x, playMatterButton.y, 'Single Player: MatterJS')
-            .setOrigin(0.5) // TODO ui/TextButton.ts
+        this.add.text(width * 0.5, height * 0.325, 'Offline', {
+            fontSize: '32px'
+        }).setOrigin(0.5)
 
-        this.buttons.push(playArcadeButton)
-        this.buttons.push(playMatterButton)
+        this.add.text(width * 0.5, height * 0.625, 'Online', {
+            fontSize: '32px'
+        }).setOrigin(0.5)
 
-        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-            // cleanup button events
-            playArcadeButton.off(MenuScene.EVENT_SELECTED)
-            playMatterButton.off(MenuScene.EVENT_SELECTED)
-        })
+        this.buttons.push(...[
+            new TextButton(this, width * 0.5, height * 0.4, 'Arcade Physics')
+                .onSelect(() => this.scene.start(SinglePlayerArcadeGameScene.KEY)),
+            new TextButton(this, width * 0.5, height * 0.5, 'MatterJS Physics')
+                .onSelect(() => this.scene.start(SinglePlayerMatterGameScene.KEY)),
+            new TextButton(this, width * 0.5, height * 0.7, 'MatterJS Physics')
+                .onSelect(() => this.scene.start(GameScene.KEY)),
+        ])
 
         this.refreshButtonColors()
     }
@@ -77,9 +74,8 @@ export default class MenuScene extends  Phaser.Scene {
     }
 
     private refreshButtonColors(): void {
-        const currentButton = this.buttons[this.selectedButtonIndex]
-        this.buttons.forEach(button => button.setTint(0xffffff))
-        currentButton.setTint(0x99ff99)
+        this.buttons.forEach((button, idx) =>
+            idx === this.selectedButtonIndex ? button.focus() : button.unfocus())
     }
 
     private selectPrevious(): void {
@@ -96,7 +92,6 @@ export default class MenuScene extends  Phaser.Scene {
     }
 
     private submit(): void {
-        const button = this.buttons[this.selectedButtonIndex]
-        button.emit(MenuScene.EVENT_SELECTED)
+        this.buttons[this.selectedButtonIndex].select()
     }
 }
