@@ -36,6 +36,7 @@ export default class GameController {
         Matter.Events.on(this._engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
                 const player = bodyA.isPlayer ? bodyA : bodyB
+                const playerFeet = bodyA.isPlayerFeet ? bodyA : bodyB
                 const diamond = bodyA.isDiamond ? bodyA : bodyB
                 const ground = bodyA.isStatic ? bodyA : bodyB
                 const bomb = bodyA.isBomb ? bodyA : bodyB
@@ -43,8 +44,8 @@ export default class GameController {
                 if (player.isPlayer && diamond.isDiamond) {
                     this.onPlayerDiamondCollisionStart(diamond)
                 }
-                if (player.isPlayer && ground.isStatic) {
-                    this.onPlayerGroundCollisionStart(player)
+                if (playerFeet.isPlayerFeet && ground.isStatic) {
+                    this.onPlayerFeetGroundCollisionStart(playerFeet)
                 }
                 if (player.isPlayer && bomb.isBomb) {
                     this.onPlayerBombCollisionStart(player)
@@ -54,10 +55,10 @@ export default class GameController {
 
         Matter.Events.on(this._engine, 'collisionEnd', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
-                const player = bodyA.isPlayer ? bodyA : bodyB
+                const playerFeet = bodyA.isPlayerFeet ? bodyA : bodyB
                 const ground = bodyA.isStatic ? bodyA : bodyB
-                if (player.isPlayer && ground.isStatic) {
-                    this.onPlayerGroundCollisionEnd(player)
+                if (playerFeet.isPlayerFeet && ground.isStatic) {
+                    this.onPlayerFeetGroundCollisionEnd(playerFeet)
                 }
             });
         });
@@ -69,12 +70,12 @@ export default class GameController {
         diamond.data.markDelete = true
     }
 
-    private onPlayerGroundCollisionStart(player: Matter.Body): void {
-        player.data.touchGround()
+    private onPlayerFeetGroundCollisionStart(playerFeet: Matter.Body): void {
+        playerFeet.data.touchGround()
     }
 
-    private onPlayerGroundCollisionEnd(player: Matter.Body): void {
-        player.data.releaseGround()
+    private onPlayerFeetGroundCollisionEnd(playerFeet: Matter.Body): void {
+        playerFeet.data.releaseGround()
     }
 
     private onPlayerBombCollisionStart(player: Matter.Body): void {

@@ -25,7 +25,9 @@ export default class MatterPlayer {
 
         const mainBodyPart = Matter.Bodies.circle(x, y, 16, bodyOptions)
         const groundSensor = Matter.Bodies.rectangle(x, y + 16, 16, 8, {
-            isSensor: true
+            isPlayerFeet: true,
+            isSensor: true,
+            data: this
         })
         this._body = Matter.Body.create({
             ...bodyOptions,
@@ -96,8 +98,7 @@ export default class MatterPlayer {
     }
 
     get canJump() {
-        //return this._touchingGround
-        return true
+        return this._touchingGround
     }
 
     get body() {
