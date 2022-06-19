@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 
 import GameController from '../controllers/GameController'
 import Assets from '../assets/Assets'
+import { DEBUG_MODE } from '../main'
 import Hud from '../ui/Hud'
 
 export default class GameRenderer {
@@ -19,6 +20,8 @@ export default class GameRenderer {
 
     private readonly context: Phaser.Scene
     private readonly controller: GameController
+
+    private debugRenderer?: Matter.Render
 
     private hud: Hud
 
@@ -45,6 +48,20 @@ export default class GameRenderer {
         })
 
         this.hud.create()
+
+        if (DEBUG_MODE) {
+            this.debugRenderer = Matter.Render.create({
+                element: document.body,
+                engine: this.controller.engine,
+                options: {
+                    width: this.context.scale.width,
+                    height: this.context.scale.height,
+                    showCollisions: true,
+                    showIds: true,
+                    showVelocity: true
+                }
+            })
+        }
     }
 
     private createPlayerAnimations() {
@@ -138,6 +155,10 @@ export default class GameRenderer {
                 this.updateBomb(sprite, body)
             }
         })
+
+        if (this.debugRenderer) {
+            Matter.Render.world(this.debugRenderer)
+        }
     }
 
     private updateDiamond(sprite: Phaser.GameObjects.Sprite | null, body: Matter.Body): void {

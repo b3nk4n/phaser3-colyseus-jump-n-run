@@ -7,6 +7,8 @@ import MatterTestScene from './scenes/MatterTestScene'
 import BootstrapScene from './scenes/BoostrapScene'
 import GameScene from './scenes/GameScene'
 
+export const DEBUG_MODE: boolean = true
+
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 960,
@@ -17,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
             gravity: {
                 y: 300
             },
-            debug: true
+            debug: DEBUG_MODE
         }
     },
     scene: [

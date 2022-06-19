@@ -27,25 +27,30 @@ export default class LevelFactory {
             bodies.push(platform.body)
         })
 
+        const bodyOptions = {
+            isStatic: true,
+            // friction: 0 needs to be set after body creation for static bodies
+        }
+
         const wallSize = 32;
         const worldBoundaryBodies = [
             // top
-            Matter.Bodies.rectangle(width / 2, -wallSize / 2, width, wallSize, {
-                isStatic: true
-            }),
-            // bottom
-            Matter.Bodies.rectangle(width / 2, height - wallSize / 2, width, wallSize, {
-                isStatic: true
-            }),
+            Matter.Bodies.rectangle(width / 2, -wallSize / 2, width, wallSize, bodyOptions),
             // left
-            Matter.Bodies.rectangle(0 - wallSize / 2, height / 2, wallSize, height, {
-                isStatic: true
-            }),
+            Matter.Bodies.rectangle(0 - wallSize / 2, height / 2, wallSize, height, bodyOptions),
             // right
-            Matter.Bodies.rectangle(width + wallSize / 2, height / 2, wallSize, height, {
-                isStatic: true,
-            })
+            Matter.Bodies.rectangle(width + wallSize / 2, height / 2, wallSize, height, bodyOptions),
+            // bottom
+            Matter.Bodies.rectangle(width / 2, height - wallSize / 2, width, wallSize, bodyOptions)
         ]
+
+        worldBoundaryBodies.forEach((body, idx) => {
+            if (idx == worldBoundaryBodies.length -1) return;
+            // As of MatterJs 0.18.0, the static body's friction needs to be set AFTER creation, because even when setting the
+            // respective option, a friction of 1.0 is assumed. See: https://github.com/liabru/matter-js/issues/694
+            body.friction = 0
+        })
+
         bodies.push(...worldBoundaryBodies)
         return bodies
     }

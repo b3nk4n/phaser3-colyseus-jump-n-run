@@ -63,15 +63,6 @@ export default class GameWorld {
     }
 
     public addPlayer(player: IPlayer): void {
-        /*
-
-        var playerFloorSensor = Bodies.circle(window.innerWidth/2,245,2,{density:0, friction:0.3, isSensor: true});
-        var player = Body.create({
-                    parts: [playerBody, playerFloorSensor],
-                    friction:0
-        });
-
-         */
         console.log({addX: player.x, addY: player.y})
         const body = Bodies.rectangle(player.x, player.y, TILE_SIZE, TILE_SIZE, {
             inertia: Infinity // disable body rotation on collision

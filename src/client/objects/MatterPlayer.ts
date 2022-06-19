@@ -14,13 +14,25 @@ export default class MatterPlayer {
     private _touchingGround = false
 
     constructor(x: number, y: number) {
-        this._body = Matter.Bodies.rectangle(x, y, 32, 32, {
-            inertia: Infinity,
-             collisionFilter: {
-                 group: -1
-             },
+        const bodyOptions = {
+            inertia: Infinity, // prevent body rotation
+            collisionFilter: {
+                group: -1
+            },
             isPlayer: true,
             data: this
+        }
+
+        const mainBodyPart = Matter.Bodies.circle(x, y, 16, bodyOptions)
+        const groundSensor = Matter.Bodies.rectangle(x, y + 16, 16, 8, {
+            isSensor: true
+        })
+        this._body = Matter.Body.create({
+            ...bodyOptions,
+            parts: [
+                mainBodyPart,
+                groundSensor
+            ],
         })
         this._body.idString = '' + this._body.id
     }
@@ -84,7 +96,8 @@ export default class MatterPlayer {
     }
 
     get canJump() {
-        return this._touchingGround
+        //return this._touchingGround
+        return true
     }
 
     get body() {

@@ -10,7 +10,7 @@ import Bomb from '../objects/Bomb'
 
 export default class GameController {
 
-    private readonly engine: Matter.Engine
+    private readonly _engine: Matter.Engine
     private readonly levelFactory: LevelFactory
 
     private width!: number
@@ -22,18 +22,18 @@ export default class GameController {
     private _level: number = 0
 
     constructor() {
-        this.engine = Matter.Engine.create()
-        this.levelFactory = new LevelFactory(this.engine)
+        this._engine = Matter.Engine.create()
+        this.levelFactory = new LevelFactory(this._engine)
     }
 
     create(width: number, height: number): void {
         this.width = width
         const envBodies = this.levelFactory.create(width, height)
-        Matter.Composite.add(this.engine.world, envBodies)
+        Matter.Composite.add(this._engine.world, envBodies)
 
         this.player = this.addPlayer(4 * TILE_SIZE, height - 1.5 * TILE_SIZE)
 
-        Matter.Events.on(this.engine, 'collisionStart', ({ pairs }) => {
+        Matter.Events.on(this._engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
                 const player = bodyA.isPlayer ? bodyA : bodyB
                 const diamond = bodyA.isDiamond ? bodyA : bodyB
@@ -52,7 +52,7 @@ export default class GameController {
             });
         });
 
-        Matter.Events.on(this.engine, 'collisionEnd', ({ pairs }) => {
+        Matter.Events.on(this._engine, 'collisionEnd', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
                 const player = bodyA.isPlayer ? bodyA : bodyB
                 const ground = bodyA.isStatic ? bodyA : bodyB
@@ -99,26 +99,26 @@ export default class GameController {
         this.player.handleControls(controls)
         this.player.update(delta)
 
-        Matter.Engine.update(this.engine, delta)
+        Matter.Engine.update(this._engine, delta)
     }
 
     public cleanup(): void {
         this.allBodies().forEach(body => {
             if (!body.isStatic && body.data.markDelete) {
-                Matter.Composite.remove(this.engine.world, body)
+                Matter.Composite.remove(this._engine.world, body)
             }
         })
     }
 
     public addPlayer(x: number, y: number): MatterPlayer {
         const player = new MatterPlayer(x, y)
-        Matter.Composite.add(this.engine.world, player.body)
+        Matter.Composite.add(this._engine.world, player.body)
         return player
     }
 
     public addDiamond(x: number, y: number): Diamond {
         const diamond = new Diamond(x, y)
-        Matter.Composite.add(this.engine.world, diamond.body)
+        Matter.Composite.add(this._engine.world, diamond.body)
         this.activeDiamonds++
         return diamond
     }
@@ -132,13 +132,13 @@ export default class GameController {
             y: 0.005
         })
         this.disableGravityFor(bomb.body)
-        Matter.Composite.add(this.engine.world, bomb.body)
+        Matter.Composite.add(this._engine.world, bomb.body)
         return bomb
     }
 
     private disableGravityFor(body: Matter.Body): void {
-        const gravity = this.engine.world.gravity
-        Matter.Events.on(this.engine, 'beforeUpdate', function() {
+        const gravity = this._engine.world.gravity
+        Matter.Events.on(this._engine, 'beforeUpdate', function() {
             Matter.Body.applyForce(body, body.position, {
                 x: -gravity.x * gravity.scale * body.mass,
                 y: -gravity.y * gravity.scale * body.mass
@@ -147,7 +147,7 @@ export default class GameController {
     }
 
     public allBodies(): Matter.Body[] {
-        return Matter.Composite.allBodies(this.engine.world)
+        return Matter.Composite.allBodies(this._engine.world)
     }
 
     get score() {
@@ -156,5 +156,9 @@ export default class GameController {
 
     get level() {
         return this._level
+    }
+
+    get engine() {
+        return this._engine
     }
 }
