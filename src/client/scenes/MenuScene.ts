@@ -2,7 +2,6 @@ import Phaser from 'phaser'
 
 import SinglePlayerMatterGameScene from './SinglePlayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './SinglePlayerArcadeGameScene'
-import RoomClient from '../services/GameRoomClient'
 import GameScene from '../scenes/GameScene'
 import TextButton from '../ui/TextButton'
 import Assets from '../assets/Assets'
@@ -36,7 +35,7 @@ export default class MenuScene extends  Phaser.Scene {
         this.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 
-        this.add.text(width * 0.5, height * 0.2, 'Select Mode', {
+        this.add.text(width * 0.5, height * 0.2, 'Select Game Mode', {
             fontSize: '48px'
         }).setOrigin(0.5)
 
