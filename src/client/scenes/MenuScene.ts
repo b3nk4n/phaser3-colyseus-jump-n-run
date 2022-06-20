@@ -57,6 +57,10 @@ export default class MenuScene extends  Phaser.Scene {
         ])
 
         this.refreshButtonColors()
+
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.buttons.forEach(button => button.dispose())
+        })
     }
 
     public update(): void {

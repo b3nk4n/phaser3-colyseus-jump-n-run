@@ -102,7 +102,7 @@ export default class GameScene extends Phaser.Scene {
         this.handlePhaseChanged(state.phase)
         this.roomClient?.onPhaseChanged(this.handlePhaseChanged, this)
 
-        this.input.keyboard.on('keydown-SPACE', this.onSpaceKeyDown, this)
+        this.input.keyboard.once('keydown-SPACE', this.onSpaceKeyDown, this) // TODO does this registered event also need to be cleaned up? Read more about events/emitters in Phaser3!
     }
 
     private otherPlayerJoined(player: IPlayer) {
