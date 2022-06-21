@@ -62,14 +62,16 @@ export default class GameRenderer {
                 }
             })
         }
+    }
 
-        this.context.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-            // cleanup renderer according to https://github.com/liabru/matter-js/issues/564
-            this.debugRenderer.canvas.remove();
-            this.debugRenderer.canvas = null;
-            this.debugRenderer.context = null;
-            this.debugRenderer.textures = {};
-        });
+    public dispose(): void {
+        this.hud.dispose()
+
+        // cleanup renderer according to https://github.com/liabru/matter-js/issues/564
+        this.debugRenderer.canvas.remove();
+        this.debugRenderer.canvas = null;
+        this.debugRenderer.context = null;
+        this.debugRenderer.textures = {};
     }
 
     private createPlayerAnimations() {

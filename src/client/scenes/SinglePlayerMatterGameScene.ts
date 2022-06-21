@@ -9,12 +9,14 @@ import MenuScene from '../scenes/MenuScene'
 export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     public static readonly KEY: string = 'single-player-matter-game'
 
-    private readonly gameController: GameController
-    private readonly gameRenderer: GameRenderer
+    private gameController!: GameController
+    private gameRenderer!: GameRenderer
 
     constructor() {
         super(SinglePlayerMatterGameScene.KEY)
+    }
 
+    init(): void {
         this.gameController = new GameController()
         this.gameRenderer = new GameRenderer(this, this.gameController)
     }
@@ -81,6 +83,9 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.input.keyboard.off('keyup-SPACE')
             this.input.keyboard.off('keyup-ESC')
+
+            this.gameController.dispose()
+            this.gameRenderer.dispose()
         });
     }
 

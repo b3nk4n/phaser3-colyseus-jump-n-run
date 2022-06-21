@@ -150,6 +150,11 @@ export default class GameController {
         })
     }
 
+    public dispose(): void {
+        Matter.Composite.clear(this.engine.world)
+        Matter.Engine.clear(this.engine)
+    }
+
     public addPlayer(x: number, y: number): MatterPlayer {
         const player = new MatterPlayer(x, y)
         Matter.Composite.add(this._engine.world, player.body)

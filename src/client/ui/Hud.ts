@@ -8,7 +8,7 @@ export default class Hud {
     private levelValue: number = 1
     private levelText?: Phaser.GameObjects.Text
 
-    private statusText?: Phaser.GameObjects.Text
+    private statusText?: Phaser.GameObjects.Text // TODO remove status text, and use overlay instead
 
     private readonly context: Phaser.Scene
 
@@ -40,6 +40,12 @@ export default class Hud {
             .setFontSize(48)
             .setOrigin(0.5)
             .setVisible(false)
+    }
+
+    public dispose(): void {
+        this.statusText?.destroy()
+        this.levelText?.destroy()
+        this.statusText?.destroy()
     }
 
     public updateScore(value: number): void {
