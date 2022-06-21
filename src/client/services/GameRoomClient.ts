@@ -1,9 +1,9 @@
 import { Client, Room } from 'colyseus.js'
 import Phaser from 'phaser'
 
-import GameState, { IGameState, GamePhase } from '../../server/schema/GameState'
+import GameState, { IGameState } from '../../server/schema/GameState'
+import { IControls, GamePhase } from '../../shared/types/commons'
 import Player, { IPlayer } from '../../server/schema/Player'
-import { IControls } from '../../shared/types/commons'
 import { Message } from '../../shared/types/messages'
 
 export interface IPositionUpdate {
@@ -115,7 +115,7 @@ export default class RoomClient {
 
     get phase(): GamePhase {
         if (!this.room) {
-            return GamePhase.WAITING_FOR_OPPONENT
+            return GamePhase.WAITING
         }
         return this.room.state.phase
     }

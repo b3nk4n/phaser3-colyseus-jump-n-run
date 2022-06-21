@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
 
 import RoomClient, { IPositionUpdate } from '../services/GameRoomClient'
-import { IGameState, GamePhase } from '../../server/schema/GameState'
-import { IControls } from '../../shared/types/commons'
+import { IControls, GamePhase } from '../../shared/types/commons'
+import { IGameState } from '../../server/schema/GameState'
 import { IPlayer } from '../../server/schema/Player'
 import ArcadePlayer from '../objects/ArcadePlayer'
 import Level from '../../server/schema/Level'
@@ -12,7 +12,7 @@ import Hud from '../ui/Hud'
 export default class GameScene extends Phaser.Scene {
     public static readonly KEY: string = 'game'
 
-    private roomClient?: RoomClient
+    private roomClient!: RoomClient
 
     private player!: ArcadePlayer
     private otherPlayers: ArcadePlayer[] = []
@@ -195,7 +195,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private handlePhaseChanged(phase: GamePhase) {
-        if (phase === GamePhase.WAITING_FOR_OPPONENT) {
+        if (phase === GamePhase.WAITING) {
             this.hud?.showMessage('Waiting for opponent...')
         } else if (phase === GamePhase.READY) {
             this.hud?.showMessage('Press SPACE to start!')

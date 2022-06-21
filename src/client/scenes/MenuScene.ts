@@ -6,7 +6,7 @@ import GameScene from '../scenes/GameScene'
 import TextButton from '../ui/TextButton'
 import Assets from '../assets/Assets'
 
-export default class MenuScene extends  Phaser.Scene {
+export default class MenuScene extends Phaser.Scene {
     public static readonly KEY: string = 'menu'
 
     private keys!: any
@@ -56,10 +56,15 @@ export default class MenuScene extends  Phaser.Scene {
                 .onSelect(() => this.scene.start(GameScene.KEY)),
         ])
 
+        // Reset index in create() method because a stopped scene is not removed but just not active.
+        // Consequently, when returning to the menu, the variable values of the previous session are still present.
+        this.selectedButtonIndex = 0
+
         this.refreshButtonColors()
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.buttons.forEach(button => button.dispose())
+            this.buttons = []
         })
     }
 

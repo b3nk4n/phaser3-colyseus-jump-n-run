@@ -1,7 +1,7 @@
 import { Command } from '@colyseus/command'
 
 import { IPlayerControlsMessage } from '../../../shared/types/messages'
-import { GamePhase } from '../../schema/GameState'
+import { GamePhase } from '../../../shared/types/commons'
 import GameWorld from '../../rooms/GameWorld'
 import { GameRoom } from '../GameRoom'
 import { Body } from 'matter-js'

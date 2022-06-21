@@ -1,17 +1,10 @@
 import { ArraySchema, Schema, type } from '@colyseus/schema'
 
+import { GamePhase } from '../../shared/types/commons'
 import Diamond from '../../server/schema/Diamond'
 import Player from '../../server/schema/Player'
 import Level from '../../server/schema/Level'
 import Bomb from '../../server/schema/Bomb'
-
-export enum GamePhase {
-    WAITING_FOR_OPPONENT,
-    READY,
-    PLAYING,
-    PAUSED,
-    GAME_OVER
-}
 
 export interface IGameState {
     phase: GamePhase
@@ -23,7 +16,7 @@ export interface IGameState {
 
 export default class GameState extends Schema implements IGameState {
     @type('uint8')
-    phase: GamePhase = GamePhase.WAITING_FOR_OPPONENT
+    phase: GamePhase = GamePhase.WAITING
 
     @type([Player])
     players: ArraySchema<Player> = new ArraySchema<Player>()

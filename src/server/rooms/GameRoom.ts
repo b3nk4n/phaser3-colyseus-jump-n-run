@@ -4,7 +4,8 @@ import { Client, Room } from 'colyseus'
 import { Message, IPlayerMessage, IPlayerControlsMessage } from '../../shared/types/messages'
 import ControlPlayerCommand from './commands/ControlPlayerCommand'
 import StartSignalCommand from './commands/StartSignalCommand'
-import GameState, { GamePhase } from '../schema/GameState'
+import { GamePhase } from '../../shared/types/commons'
+import GameState from '../schema/GameState'
 import GameWorld from './GameWorld'
 
 export class GameRoom extends Room<GameState> {

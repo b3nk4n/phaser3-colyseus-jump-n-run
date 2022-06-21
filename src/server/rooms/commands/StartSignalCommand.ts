@@ -1,6 +1,6 @@
 import { Command } from '@colyseus/command'
 
-import { GamePhase } from '../../schema/GameState'
+import { GamePhase } from '../../../shared/types/commons'
 import { GameRoom } from '../GameRoom'
 
 export default class StartSignalCommand extends Command<GameRoom> {

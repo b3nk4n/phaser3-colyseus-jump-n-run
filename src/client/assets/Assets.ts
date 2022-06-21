@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 export default class Assets {
 
+    public static readonly STATIC: string = 'static'
     public static readonly BACKGROUND: string = 'background'
     public static readonly BUTTON: string = 'button'
     public static readonly PLATFORM_SMALL: string = 'platform-small'
@@ -25,6 +26,7 @@ export default class Assets {
 
     public load(): void {
         const loader = this.context.load
+        loader.image(Assets.STATIC, 'assets/static.png')
         loader.image(Assets.BACKGROUND, 'assets/background.png')
         loader.image(Assets.BUTTON, 'assets/button.png')
         loader.image(Assets.PLATFORM_SMALL, 'assets/platform160.png')

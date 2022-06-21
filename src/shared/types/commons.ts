@@ -10,3 +10,11 @@ export interface IPlatformDef {
     y: number
     isSmall: boolean
 }
+
+export enum GamePhase {
+    WAITING,
+    READY,
+    PLAYING,
+    PAUSED,
+    GAME_OVER
+}

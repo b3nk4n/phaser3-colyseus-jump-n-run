@@ -5,9 +5,11 @@ import Assets from '../assets/Assets'
 export default class TextButton {
     private static readonly EVENT_SELECTED = 'selected';
 
+    private context: Phaser.Scene
     private buttonImage: Phaser.GameObjects.Image
 
     constructor(context: Phaser.Scene, x: number, y: number, text: string) {
+        this.context = context
         this.buttonImage = context.add.image(x, y, Assets.BUTTON)
         context.add.text(x, y, text)
             .setOrigin(0.5)
@@ -34,5 +36,6 @@ export default class TextButton {
 
     public dispose(): void {
         this.buttonImage.off(TextButton.EVENT_SELECTED)
+        this.buttonImage.destroy()
     }
 }

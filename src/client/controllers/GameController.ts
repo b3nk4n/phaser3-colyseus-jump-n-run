@@ -1,7 +1,7 @@
 import Matter from 'matter-js'
 
 import { randomBetween } from '../../shared/randomUtils'
-import { IControls } from '../../shared/types/commons'
+import { GamePhase, IControls } from '../../shared/types/commons'
 import LevelFactory from '../factories/LevelFactory'
 import MatterPlayer from '../objects/MatterPlayer'
 import { TILE_SIZE } from '../../shared/constants'
@@ -16,6 +16,10 @@ export default class GameController {
     private width!: number
 
     private player!: MatterPlayer
+
+    private _phase: GamePhase = GamePhase.WAITING
+    private _gamePhaseChangedCallback: (newPhase: GamePhase, oldPhase: GamePhase) => void = () => {}
+    private gameOverCountdown: number = 0
 
     private activeDiamonds: number = 0
     private _score: number = 0
@@ -80,9 +84,31 @@ export default class GameController {
 
     private onPlayerBombCollisionStart(player: Matter.Body): void {
         player.data.kill()
+        this.gameOverCountdown = 3000
     }
 
-    public startGame(): void {
+    public ready(): void {
+        this.phase = GamePhase.READY
+    }
+
+    public pause(): void {
+        this.phase = GamePhase.PAUSED
+    }
+
+    public resume(): void {
+        this.phase = GamePhase.PLAYING
+    }
+
+    public restart(): void {
+        // TODO revive and reset player and generally reset the game
+        this.phase = GamePhase.WAITING
+    }
+
+    public leave(): void {
+        // TODO cleanup ?
+    }
+
+    private startGame(): void {
         for (let i = 0; i < 15; ++i) {
             this.addDiamond(32 + i * 64, 16)
         }
@@ -91,6 +117,19 @@ export default class GameController {
     }
 
     public update(delta: number, controls: IControls): void {
+        if (this.phase !== GamePhase.PLAYING) {
+            const allPlayersAreReady = true // TODO implement logic for N players
+            if (this.phase === GamePhase.READY && allPlayersAreReady) {
+                this.phase = GamePhase.PLAYING
+            }
+            return
+        }
+
+        this.gameOverCountdown -= delta
+        if (this.player.dead && this.gameOverCountdown < 0) {
+            this.phase = GamePhase.GAME_OVER
+        }
+
         if (this.activeDiamonds == 0) {
             this._level++
             this.startGame()
@@ -149,6 +188,24 @@ export default class GameController {
 
     public allBodies(): Matter.Body[] {
         return Matter.Composite.allBodies(this._engine.world)
+    }
+
+    set gamePhaseChangedCallback(handler: (newPhase: GamePhase, oldPhase: GamePhase) => void) {
+        this._gamePhaseChangedCallback = handler
+    }
+
+    set phase(value: GamePhase) {
+        if (this._phase != value) {
+            const prevPhase = this._phase
+            this._phase = value
+            if (this._gamePhaseChangedCallback) {
+                this._gamePhaseChangedCallback(value, prevPhase)
+            }
+        }
+    }
+
+    get phase(): GamePhase {
+        return this._phase
     }
 
     get score() {
