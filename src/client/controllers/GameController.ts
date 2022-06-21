@@ -105,7 +105,7 @@ export default class GameController {
     }
 
     public leave(): void {
-        // TODO cleanup ?
+        // TODO send notification to server in case of online multiplayer?
     }
 
     private startGame(): void {

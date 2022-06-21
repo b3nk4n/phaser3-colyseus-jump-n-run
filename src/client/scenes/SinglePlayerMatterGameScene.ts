@@ -12,6 +12,8 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     private gameController!: GameController
     private gameRenderer!: GameRenderer
 
+    private keyboardKeys
+
     constructor() {
         super(SinglePlayerMatterGameScene.KEY)
     }
@@ -19,6 +21,11 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     init(): void {
         this.gameController = new GameController()
         this.gameRenderer = new GameRenderer(this, this.gameController)
+
+        this.keyboardKeys = {
+            cursors: this.input.keyboard.createCursorKeys(),
+            space: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        }
     }
 
     create(): void {
@@ -98,14 +105,12 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     }
 
     private keyboardControls(): IControls {
-        // TODO register keys in init(), and only return the values here? Does this currently create a lot of GC?
-        const cursors = this.input.keyboard.createCursorKeys()
-        const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        const { cursors, space } = this.keyboardKeys
         return {
             up: cursors.up.isDown,
             left: cursors.left.isDown,
             right: cursors.right.isDown,
-            space: spaceKey.isDown
+            space: space.isDown
         }
     }
 }

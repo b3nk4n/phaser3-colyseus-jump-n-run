@@ -53,11 +53,11 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.diamonds, this.platforms)
 
-        // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
+        // @ts-ignore typescript bug https://github.com/photonstorm/phaser/issues/5882
         this.physics.add.overlap(this.player.sprite, this.diamonds, this.onCollectDiamond, undefined, this)
 
         this.physics.add.collider(this.bombs, this.platforms)
-        // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
+        // @ts-ignore typescript bug https://github.com/photonstorm/phaser/issues/5882
         const playerBombCollider = this.physics.add.collider(this.player.sprite, this.bombs, this.onBombHit, () => {
             this.physics.world.removeCollider(playerBombCollider)
         }, this)
@@ -137,7 +137,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
             this.hud?.updateLevel(this.level)
 
             this.diamonds.children.iterate((child) => {
-                // @ts-ignore FIXME typescript bug https://github.com/photonstorm/phaser/issues/5882
+                // @ts-ignore typescript bug https://github.com/photonstorm/phaser/issues/5882
                 child.enableBody(true, child.x, 0, true, true)
             })
 
