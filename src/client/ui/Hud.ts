@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 
+import { PLAYER_CONFIG } from '../../shared/constants'
+
 export default class Hud {
 
     private scoreValues: number[] = []
@@ -22,12 +24,13 @@ export default class Hud {
         for (let i = 0; i < numPlayers; ++i) {
             this.scoreValues.push(0)
             const scoreText = this.context.add.text(
-                16, 16,
+                16, 16 + i * 32,
                 this.formatScore(0),
                 {
                     fontSize: '28px',
                     color: '#FFF'
                 })
+                .setTint(PLAYER_CONFIG[i].color)
             this.scoreTexts.push(scoreText)
         }
 

@@ -1,10 +1,10 @@
 import Matter from 'matter-js'
 
-import { randomBetween } from '../../shared/randomUtils'
 import { GamePhase, IControls, EMPTY_CONTROLS } from '../../shared/types/commons'
+import { TILE_SIZE, PLAYER_CONFIG } from '../../shared/constants'
+import { randomBetween } from '../../shared/randomUtils'
 import LevelFactory from '../factories/LevelFactory'
 import MatterPlayer from '../objects/MatterPlayer'
-import { TILE_SIZE } from '../../shared/constants'
 import Diamond from '../objects/Diamond'
 import Bomb from '../objects/Bomb'
 
@@ -43,7 +43,12 @@ export default class GameController {
         // We set the position slightly above the ground, because when we restart the game then we set the position manually
         // using Body.setPosition(body, pos), which however only causes a collision-end event, but no collision-start event.
         for (let i = 0; i < numPlayers; ++i) {
-            const player = this.addPlayer(4 * TILE_SIZE, height - 1.75 * TILE_SIZE)
+            const playerConfig = PLAYER_CONFIG[i]
+            const player = this.addPlayer(
+                playerConfig.startX,
+                height - 1.75 * TILE_SIZE,
+                playerConfig.facingLeft,
+                playerConfig.color)
             this._players.push(player)
             this.playerControls.push(EMPTY_CONTROLS)
         }
@@ -187,20 +192,20 @@ export default class GameController {
         Matter.Engine.clear(this.engine)
     }
 
-    public addPlayer(x: number, y: number): MatterPlayer {
-        const player = new MatterPlayer(x, y, false)
+    private addPlayer(x: number, y: number, facingLeft: boolean, color: number): MatterPlayer {
+        const player = new MatterPlayer(x, y, facingLeft, color)
         Matter.Composite.add(this._engine.world, player.body)
         return player
     }
 
-    public addDiamond(x: number, y: number): Diamond {
+    private addDiamond(x: number, y: number): Diamond {
         const diamond = new Diamond(x, y)
         Matter.Composite.add(this._engine.world, diamond.body)
         this.activeDiamonds++
         return diamond
     }
 
-    public addBomb(): Bomb {
+    private addBomb(): Bomb {
         const x = randomBetween(TILE_SIZE, this.width - TILE_SIZE)
         const bomb = new Bomb(x, TILE_SIZE / 2)
         const directionFactor = Math.random() > 0.5 ? 1 : -1;

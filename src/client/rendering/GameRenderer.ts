@@ -25,6 +25,10 @@ export default class GameRenderer {
 
     private hud: Hud
 
+    // TODO better to use a player map instead of a list? The via the id of the body, we could access all we need and we would
+    //      not need this counter here :)
+    private registeredPlayers: number = 0
+
     constructor(context: Phaser.Scene, controller: GameController) {
         this.context = context
         this.controller = controller
@@ -214,7 +218,7 @@ export default class GameRenderer {
             return
         }
 
-        sprite.setTint(0xffffff)
+        sprite.setTint(body.data.color)
 
         const velocityX = body.velocity.x
         const velocityY = body.velocity.y
@@ -271,6 +275,8 @@ export default class GameRenderer {
 
     private addPlayerSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
         return this.context.add.sprite(body.position.x, body. position.y, Assets.PLAYER_IDLE)
+            .setTint(body.data.color)
+            .setFlipX(body.data.facingLeft)
             .setName(body.idString)
     }
 

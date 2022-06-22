@@ -13,15 +13,18 @@ export default class MatterPlayer {
     private _dead: boolean = false
     private _touchingGround = false
     private _score: number = 0
+    private readonly _color: number
 
     private readonly initialX
     private readonly initialY
     private readonly initialFacingLeft
 
-    constructor(x: number, y: number, facingLeft: boolean) {
+    constructor(x: number, y: number, facingLeft: boolean, color: number) {
         this.initialX = x
         this.initialY = y
         this.initialFacingLeft = facingLeft
+        this._facingLeft = facingLeft
+        this._color = color
 
         const bodyOptions = {
             inertia: Infinity, // prevent body rotation
@@ -116,6 +119,10 @@ export default class MatterPlayer {
 
     public addScore(value: number): void {
         this._score += value
+    }
+
+    get color(): number {
+        return this._color
     }
 
     get facingLeft(): boolean {
