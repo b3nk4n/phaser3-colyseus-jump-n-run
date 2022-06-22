@@ -137,6 +137,17 @@ export default class GameRenderer {
         })
     }
 
+    public reset(): void {
+        this.controller.allBodies().forEach(body => {
+            if (!body.isStatic) {
+                const sprite = this.context.children.getByName(body.idString)
+                if (sprite != null) {
+                    sprite.destroy()
+                }
+            }
+        })
+    }
+
     public update(): void {
         this.hud.updateScore(this.controller.score)
         this.hud.updateLevel(this.controller.level)
@@ -150,7 +161,10 @@ export default class GameRenderer {
 
             if (body.data.markDelete) {
                 if (sprite != null) {
-                    this.context.children.remove(sprite)
+                    // According to https://phaser.io/examples/v3/view/game-objects/group/destroy-child, this internally fires
+                    // a 'destroy' event that the group is listening to and then automatically removes it.
+                    sprite.destroy()
+                    // this.context.children.remove(sprite)
                 }
                 return
             }

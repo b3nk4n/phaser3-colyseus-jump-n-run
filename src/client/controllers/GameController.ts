@@ -35,7 +35,9 @@ export default class GameController {
         const envBodies = this.levelFactory.create(width, height)
         Matter.Composite.add(this._engine.world, envBodies)
 
-        this.player = this.addPlayer(4 * TILE_SIZE, height - 1.5 * TILE_SIZE)
+        // We set the position slightly above the ground, because when we restart the game then we set the position manually
+        // using Body.setPosition(body, pos), which however only causes a collision-end event, but no collision-start event.
+        this.player = this.addPlayer(4 * TILE_SIZE, height - 1.75 * TILE_SIZE)
 
         Matter.Events.on(this._engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
@@ -100,8 +102,23 @@ export default class GameController {
     }
 
     public restart(): void {
-        // TODO revive and reset player and generally reset the game
-        this.phase = GamePhase.WAITING
+        this.phase = GamePhase.READY
+
+        this._score = 0
+        this._level = 1
+        this.gameOverCountdown = 0
+        this.activeDiamonds = 0
+
+        this.player.reset()
+
+        // clear bombs and diamonds
+        this.allBodies().forEach(body =>{
+            if (body.isDiamond || body.isBomb) {
+                Matter.Composite.remove(this.engine.world, body)
+            }
+        })
+
+        this.startGame()
     }
 
     public leave(): void {
@@ -156,7 +173,7 @@ export default class GameController {
     }
 
     public addPlayer(x: number, y: number): MatterPlayer {
-        const player = new MatterPlayer(x, y)
+        const player = new MatterPlayer(x, y, false)
         Matter.Composite.add(this._engine.world, player.body)
         return player
     }

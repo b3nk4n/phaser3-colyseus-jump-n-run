@@ -13,7 +13,15 @@ export default class MatterPlayer {
     private _dead: boolean = false
     private _touchingGround = false
 
-    constructor(x: number, y: number) {
+    private readonly initialX
+    private readonly initialY
+    private readonly initialFacingLeft
+
+    constructor(x: number, y: number, facingLeft: boolean) {
+        this.initialX = x
+        this.initialY = y
+        this.initialFacingLeft = facingLeft
+
         const bodyOptions = {
             inertia: Infinity, // prevent body rotation
             collisionFilter: {
@@ -37,6 +45,17 @@ export default class MatterPlayer {
             ],
         })
         this._body.idString = '' + this._body.id
+    }
+
+    public reset(): void {
+        this._dead = false
+        this._dizzyCountdown = 0
+        this._markDelete = false
+        this._attacking = false
+        this._facingLeft = this.initialFacingLeft
+
+        Matter.Body.setPosition(this.body, { x: this.initialX, y: this.initialY })
+        Matter.Body.setVelocity(this.body, { x: 0, y: 0 })
     }
 
     public update(delta: number): void {

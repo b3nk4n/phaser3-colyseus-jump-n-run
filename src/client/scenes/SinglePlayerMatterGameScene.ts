@@ -50,7 +50,8 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
                 this.scene.stop(TextOverlay.KEY)
             } else if (oldPhase === GamePhase.PLAYING && newPhase == GamePhase.GAME_OVER) {
                 this.scene.launch(TextOverlay.KEY, {
-                    title: 'GAME OVER'
+                    title: 'GAME OVER',
+                    text: 'Press SPACE to continue'
                 })
             }
         }
@@ -64,6 +65,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
             } else if (phase === GamePhase.PAUSED) {
                 this.gameController.resume()
             } else if (phase === GamePhase.GAME_OVER) {
+                this.gameRenderer.reset()
                 this.gameController.restart()
             }
         })
