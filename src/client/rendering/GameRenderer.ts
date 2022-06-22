@@ -47,7 +47,7 @@ export default class GameRenderer {
             }
         })
 
-        this.hud.create()
+        this.hud.create(this.controller.players.length)
 
         if (DEBUG_MODE) {
             this.debugRenderer = Matter.Render.create({
@@ -149,7 +149,8 @@ export default class GameRenderer {
     }
 
     public update(): void {
-        this.hud.updateScore(this.controller.score)
+        this.controller.players.forEach((player, idx) =>
+            this.hud.updateScore(idx, player.score))
         this.hud.updateLevel(this.controller.level)
 
         this.controller.allBodies().forEach(body => {

@@ -6,32 +6,38 @@ import TextOverlay from '../ui/overlays/TextOverlay'
 import GameRenderer from '../rendering/GameRenderer'
 import MenuScene from '../scenes/MenuScene'
 
-export default class SinglePlayerMatterGameScene extends Phaser.Scene {
-    public static readonly KEY: string = 'single-player-matter-game'
+export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
+    public static readonly KEY: string = 'local-multiplayer-matter-game'
+
+    private static readonly NUM_PLAYERS = 2
 
     private gameController!: GameController
     private gameRenderer!: GameRenderer
 
-    private keyboardKeys
+    private keyboardKeys: any[] = []
 
     constructor() {
-        super(SinglePlayerMatterGameScene.KEY)
+        super(LocalMultiplayerMatterGameScene.KEY)
     }
 
     init(): void {
         this.gameController = new GameController()
         this.gameRenderer = new GameRenderer(this, this.gameController)
 
-        this.keyboardKeys = {
+        this.keyboardKeys.push({
             cursors: this.input.keyboard.createCursorKeys(),
-            space: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
-        }
+            action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+        })
+        this.keyboardKeys.push({
+            cursors: this.input.keyboard.addKeys({ left: 'A', right: 'D', up: 'W' }),
+            action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
+        })
     }
 
     create(): void {
         const { width, height } = this.scale
 
-        this.gameController.create(width, height, 1)
+        this.gameController.create(width, height, LocalMultiplayerMatterGameScene.NUM_PLAYERS)
         this.gameController.gamePhaseChangedCallback = (newPhase, oldPhase) => {
             if (oldPhase === GamePhase.WAITING && newPhase == GamePhase.READY) {
                 this.scene.stop(TextOverlay.KEY)
@@ -76,7 +82,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
                 phase === GamePhase.PAUSED ||
                 phase === GamePhase.GAME_OVER) {
                 this.scene.stop(TextOverlay.KEY)
-                this.scene.stop(SinglePlayerMatterGameScene.KEY)
+                this.scene.stop(LocalMultiplayerMatterGameScene.KEY)
                 this.scene.start(MenuScene.KEY)
                 this.gameController.leave()
             } else if (phase === GamePhase.PLAYING) {
@@ -99,21 +105,23 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        const controls = this.keyboardControls()
+        for (let pIdx = 0; pIdx < LocalMultiplayerMatterGameScene.NUM_PLAYERS; ++pIdx) {
+            const controls = this.keyboardControls(pIdx)
+            this.gameController.setPlayerControls(pIdx, controls)
+        }
 
-        this.gameController.setPlayerControls(0, controls)
         this.gameController.update(delta)
         this.gameRenderer.update()
         this.gameController.cleanup()
     }
 
-    private keyboardControls(): IControls {
-        const { cursors, space } = this.keyboardKeys
+    private keyboardControls(playerIdx: number): IControls {
+        const { cursors, action } = this.keyboardKeys[playerIdx]
         return {
             up: cursors.up.isDown,
             left: cursors.left.isDown,
             right: cursors.right.isDown,
-            actionKey: space.isDown
+            actionKey: action.isDown
         }
     }
 }

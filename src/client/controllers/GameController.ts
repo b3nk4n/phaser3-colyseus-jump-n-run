@@ -1,7 +1,7 @@
 import Matter from 'matter-js'
 
 import { randomBetween } from '../../shared/randomUtils'
-import { GamePhase, IControls } from '../../shared/types/commons'
+import { GamePhase, IControls, EMPTY_CONTROLS } from '../../shared/types/commons'
 import LevelFactory from '../factories/LevelFactory'
 import MatterPlayer from '../objects/MatterPlayer'
 import { TILE_SIZE } from '../../shared/constants'
@@ -15,14 +15,15 @@ export default class GameController {
 
     private width!: number
 
-    private player!: MatterPlayer
+    private _players: MatterPlayer[] = []
+    private playerControls: IControls[] = []
 
     private _phase: GamePhase = GamePhase.WAITING
     private _gamePhaseChangedCallback: (newPhase: GamePhase, oldPhase: GamePhase) => void = () => {}
     private gameOverCountdown: number = 0
 
     private activeDiamonds: number = 0
-    private _score: number = 0
+    //private _score: number = 0
     private _level: number = 0
 
     constructor() {
@@ -30,14 +31,22 @@ export default class GameController {
         this.levelFactory = new LevelFactory(this._engine)
     }
 
-    create(width: number, height: number): void {
+    create(width: number, height: number, numPlayers: number): void {
+        if (numPlayers < 0 || numPlayers > 2) {
+            throw Error('Only 1 or 2 players are supported.')
+        }
+
         this.width = width
         const envBodies = this.levelFactory.create(width, height)
         Matter.Composite.add(this._engine.world, envBodies)
 
         // We set the position slightly above the ground, because when we restart the game then we set the position manually
         // using Body.setPosition(body, pos), which however only causes a collision-end event, but no collision-start event.
-        this.player = this.addPlayer(4 * TILE_SIZE, height - 1.75 * TILE_SIZE)
+        for (let i = 0; i < numPlayers; ++i) {
+            const player = this.addPlayer(4 * TILE_SIZE, height - 1.75 * TILE_SIZE)
+            this._players.push(player)
+            this.playerControls.push(EMPTY_CONTROLS)
+        }
 
         Matter.Events.on(this._engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
@@ -48,7 +57,7 @@ export default class GameController {
                 const bomb = bodyA.isBomb ? bodyA : bodyB
 
                 if (player.isPlayer && diamond.isDiamond) {
-                    this.onPlayerDiamondCollisionStart(diamond)
+                    this.onPlayerDiamondCollisionStart(player, diamond)
                 }
                 if (playerFeet.isPlayerFeet && ground.isStatic) {
                     this.onPlayerFeetGroundCollisionStart(playerFeet)
@@ -70,8 +79,8 @@ export default class GameController {
         });
     }
 
-    private onPlayerDiamondCollisionStart(diamond: Matter.Body): void {
-        this._score += diamond.data.value
+    private onPlayerDiamondCollisionStart(player: Matter.Body, diamond: Matter.Body): void {
+        player.data.addScore(diamond.data.value)
         this.activeDiamonds--
         diamond.data.markDelete = true
     }
@@ -104,12 +113,11 @@ export default class GameController {
     public restart(): void {
         this.phase = GamePhase.READY
 
-        this._score = 0
         this._level = 1
         this.gameOverCountdown = 0
         this.activeDiamonds = 0
 
-        this.player.reset()
+        this._players.forEach(player => player.reset())
 
         // clear bombs and diamonds
         this.allBodies().forEach(body =>{
@@ -133,7 +141,11 @@ export default class GameController {
         this.addBomb()
     }
 
-    public update(delta: number, controls: IControls): void {
+    public setPlayerControls(playerIdx: number, controls: IControls): void {
+        this.playerControls[playerIdx] = controls
+    }
+
+    public update(delta: number): void {
         if (this.phase !== GamePhase.PLAYING) {
             const allPlayersAreReady = true // TODO implement logic for N players
             if (this.phase === GamePhase.READY && allPlayersAreReady) {
@@ -143,7 +155,8 @@ export default class GameController {
         }
 
         this.gameOverCountdown -= delta
-        if (this.player.dead && this.gameOverCountdown < 0) {
+        const allPlayersDead = this._players.every(player => player.dead)
+        if (allPlayersDead && this.gameOverCountdown < 0) {
             this.phase = GamePhase.GAME_OVER
         }
 
@@ -153,8 +166,10 @@ export default class GameController {
             return
         }
 
-        this.player.handleControls(controls)
-        this.player.update(delta)
+        this._players.forEach((player, idx) => {
+            player.handleControls(this.playerControls[idx])
+            player.update(delta)
+        })
 
         Matter.Engine.update(this._engine, delta)
     }
@@ -190,8 +205,8 @@ export default class GameController {
         const bomb = new Bomb(x, TILE_SIZE / 2)
         const directionFactor = Math.random() > 0.5 ? 1 : -1;
         Matter.Body.applyForce(bomb.body, bomb.body.position, {
-            x: directionFactor * 0.005,
-            y: 0.005
+            x: directionFactor * 0.0033,
+            y: 0.0033
         })
         this.disableGravityFor(bomb.body)
         Matter.Composite.add(this._engine.world, bomb.body)
@@ -230,8 +245,8 @@ export default class GameController {
         return this._phase
     }
 
-    get score() {
-        return this._score
+    get players(): MatterPlayer[] {
+        return this._players
     }
 
     get level() {

@@ -22,7 +22,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         up: false,
         left: false,
         right: false,
-        space: false
+        actionKey: false
     }
 
     constructor() {
@@ -38,7 +38,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         this.physics.add.collider(this.player.sprite, this.platforms)
 
         this.hud = new Hud(this)
-        this.hud.create()
+        this.hud.create(1)
 
         this.startGame()
     }
@@ -119,7 +119,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         this.activeControls.up = cursors.up.isDown
         this.activeControls.left = cursors.left.isDown
         this.activeControls.right = cursors.right.isDown
-        this.activeControls.space = spaceKey.isDown
+        this.activeControls.actionKey = spaceKey.isDown
 
         this.player.handleInput(this.activeControls)
         this.player.update(time, delta)
@@ -130,7 +130,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         diamond.disableBody(true, true)
         const diamondValue = diamond.getData('value')
         this.score += diamondValue
-        this.hud?.updateScore(this.score)
+        this.hud?.updateScore(0, this.score)
 
         if (this.diamonds?.countActive(true) === 0) {
             this.level++

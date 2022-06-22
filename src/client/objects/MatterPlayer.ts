@@ -12,6 +12,7 @@ export default class MatterPlayer {
     private _dizzyCountdown: number = 0
     private _dead: boolean = false
     private _touchingGround = false
+    private _score: number = 0
 
     private readonly initialX
     private readonly initialY
@@ -53,6 +54,7 @@ export default class MatterPlayer {
         this._markDelete = false
         this._attacking = false
         this._facingLeft = this.initialFacingLeft
+        this._score = 0
 
         Matter.Body.setPosition(this.body, { x: this.initialX, y: this.initialY })
         Matter.Body.setVelocity(this.body, { x: 0, y: 0 })
@@ -65,7 +67,7 @@ export default class MatterPlayer {
     }
 
     public handleControls(controls: IControls) {
-        const { left, up, right, space } = controls
+        const { left, up, right, actionKey } = controls
         const { x: vx, y: vy } = this.body.velocity
 
         if (this.dead || this.dizzy) {
@@ -89,7 +91,7 @@ export default class MatterPlayer {
             newY = -10
         }
 
-        this._attacking = space
+        this._attacking = actionKey
 
         Matter.Body.setVelocity(this.body, { x: newX, y: newY })
     }
@@ -110,6 +112,10 @@ export default class MatterPlayer {
 
     public kill(): void {
         this._dead = true
+    }
+
+    public addScore(value: number): void {
+        this._score += value
     }
 
     get facingLeft(): boolean {
@@ -142,5 +148,9 @@ export default class MatterPlayer {
 
     get attacking() {
         return this._attacking
+    }
+
+    get score() {
+        return this._score
     }
 }

@@ -114,7 +114,7 @@ export default class ArcadePlayer {
 
         const touchGround = this.isTouchingGround
 
-        this._attacking = controls.space;
+        this._attacking = controls.actionKey;
         if (this._attacking) {
             this.applyFrictionToPlayer(touchGround)
             return

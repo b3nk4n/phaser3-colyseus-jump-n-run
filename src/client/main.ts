@@ -1,6 +1,7 @@
 import 'regenerator-runtime/runtime'
 import Phaser from 'phaser'
 
+import LocalMultiplayerMatterGameScene from './scenes/LocalMultiplayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './scenes/SinglePlayerArcadeGameScene'
 import SinglePlayerMatterGameScene from './scenes/SinglePlayerMatterGameScene'
 import MatterTestScene from './scenes/MatterTestScene'
@@ -30,6 +31,7 @@ const config: Phaser.Types.Core.GameConfig = {
         GameScene,
         SinglePlayerArcadeGameScene,
         SinglePlayerMatterGameScene,
+        LocalMultiplayerMatterGameScene,
         TextOverlay,
         MatterTestScene]
 }

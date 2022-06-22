@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 
+import LocalMultiplayerMatterGameScene from './LocalMultiplayerMatterGameScene'
 import SinglePlayerMatterGameScene from './SinglePlayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './SinglePlayerArcadeGameScene'
 import GameScene from '../scenes/GameScene'
@@ -39,11 +40,11 @@ export default class MenuScene extends Phaser.Scene {
             fontSize: '48px'
         }).setOrigin(0.5)
 
-        this.add.text(width * 0.5, height * 0.325, 'Offline', {
+        this.add.text(width * 0.5, height * 0.325, 'Single-Player', {
             fontSize: '32px'
         }).setOrigin(0.5)
 
-        this.add.text(width * 0.5, height * 0.625, 'Online', {
+        this.add.text(width * 0.5, height * 0.625, 'Multiplayer', {
             fontSize: '32px'
         }).setOrigin(0.5)
 
@@ -52,7 +53,9 @@ export default class MenuScene extends Phaser.Scene {
                 .onSelect(() => this.scene.start(SinglePlayerArcadeGameScene.KEY)),
             new TextButton(this, width * 0.5, height * 0.5, 'MatterJS Physics')
                 .onSelect(() => this.scene.start(SinglePlayerMatterGameScene.KEY)),
-            new TextButton(this, width * 0.5, height * 0.7, 'MatterJS Physics')
+            new TextButton(this, width * 0.5, height * 0.7, 'Local 2 Player Battle')
+                .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY)),
+            new TextButton(this, width * 0.5, height * 0.8, 'Online Battle')
                 .onSelect(() => this.scene.start(GameScene.KEY)),
         ])
 

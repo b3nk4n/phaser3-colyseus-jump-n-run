@@ -2,8 +2,8 @@ import Phaser from 'phaser'
 
 export default class Hud {
 
-    private scoreValue: number = 0
-    private scoreText?: Phaser.GameObjects.Text
+    private scoreValues: number[] = []
+    private scoreTexts: Phaser.GameObjects.Text[] = []
 
     private levelValue: number = 1
     private levelText?: Phaser.GameObjects.Text
@@ -16,16 +16,20 @@ export default class Hud {
         this.context = context
     }
 
-    public create(): void {
+    public create(numPlayers: number): void {
         const { width, height } = this.context.scale
 
-        this.scoreText = this.context.add.text(
-            16, 16,
-            this.formatScore(this.scoreValue),
-            {
-                fontSize: '28px',
-                color: '#FFF'
-            })
+        for (let i = 0; i < numPlayers; ++i) {
+            this.scoreValues.push(0)
+            const scoreText = this.context.add.text(
+                16, 16,
+                this.formatScore(0),
+                {
+                    fontSize: '28px',
+                    color: '#FFF'
+                })
+            this.scoreTexts.push(scoreText)
+        }
 
         this.levelText = this.context.add.text(
             width - 148, 16,
@@ -43,15 +47,16 @@ export default class Hud {
     }
 
     public dispose(): void {
-        this.statusText?.destroy()
+        this.scoreTexts.forEach(scoreText => scoreText.destroy())
         this.levelText?.destroy()
         this.statusText?.destroy()
     }
 
-    public updateScore(value: number): void {
-        if (value != this.scoreValue) {
-            this.scoreValue = value
-            this.scoreText?.setText(this.formatScore(value))
+    public updateScore(playerIdx: number, value: number): void {
+        const scoreText = this.scoreTexts[playerIdx]
+        if (value != this.scoreValues[playerIdx]) {
+            this.scoreValues[playerIdx] = value
+            scoreText.setText(this.formatScore(value))
         }
     }
 

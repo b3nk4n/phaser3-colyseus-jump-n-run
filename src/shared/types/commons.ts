@@ -1,8 +1,15 @@
+
+export const EMPTY_CONTROLS: IControls = {
+    up: false,
+    left: false,
+    right: false,
+    actionKey: false
+}
 export interface IControls {
     up: boolean
     left: boolean
     right: boolean
-    space: boolean
+    actionKey: boolean
 }
 
 export interface IPlatformDef {
