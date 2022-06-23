@@ -7,8 +7,10 @@ export default class MatterPlayer {
     private readonly _body: Matter.Body
     private _markDelete: boolean = false
 
+    private static readonly ATTACK_COOLDOWN: number = 1000
+    private _attackingCountdown: number = 0
+
     private _facingLeft: boolean = false
-    private _attacking: boolean = false
     private _dizzyCountdown: number = 0
     private _dead: boolean = false
     private _touchingGround = false
@@ -55,7 +57,7 @@ export default class MatterPlayer {
         this._dead = false
         this._dizzyCountdown = 0
         this._markDelete = false
-        this._attacking = false
+        this._attackingCountdown = 0
         this._facingLeft = this.initialFacingLeft
         this._score = 0
 
@@ -67,6 +69,9 @@ export default class MatterPlayer {
         if (this._dizzyCountdown > 0) {
             this._dizzyCountdown -= delta
         }
+        if (this._attackingCountdown > 0) {
+            this._attackingCountdown -= delta
+        }
     }
 
     public handleControls(controls: IControls) {
@@ -74,27 +79,30 @@ export default class MatterPlayer {
         const { x: vx, y: vy } = this.body.velocity
 
         if (this.dead || this.dizzy) {
-            this._attacking = false
+            this._attackingCountdown = 0
             return
         }
 
         let newX = vx
         let newY = vy
 
-        if (right && !left) {
-            this._facingLeft = false
-            newX = 3
+        if (actionKey && this.canAttack) {
+            this._attackingCountdown = 1500
         }
-        if (left && !right) {
-            this._facingLeft = true
-            newX = -3
+        if (!this.attacking) {
+            if (right && !left) {
+                this._facingLeft = false
+                newX = 3
+            }
+            if (left && !right) {
+                this._facingLeft = true
+                newX = -3
+            }
         }
 
         if (up && this.canJump) {
             newY = -10
         }
-
-        this._attacking = actionKey
 
         Matter.Body.setVelocity(this.body, { x: newX, y: newY })
     }
@@ -107,7 +115,7 @@ export default class MatterPlayer {
         this._touchingGround = false
     }
 
-    public punch(): void {
+    public takePunch(): void {
         if (!this.dizzy) {
             this._dizzyCountdown = 2500
         }
@@ -153,8 +161,12 @@ export default class MatterPlayer {
         return this._dead
     }
 
+    get canAttack() {
+        return this._attackingCountdown <= 0
+    }
+
     get attacking() {
-        return this._attacking
+        return this._attackingCountdown > MatterPlayer.ATTACK_COOLDOWN
     }
 
     get score() {

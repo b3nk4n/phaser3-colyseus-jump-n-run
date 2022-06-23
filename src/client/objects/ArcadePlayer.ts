@@ -184,7 +184,7 @@ export default class ArcadePlayer {
         }
     }
 
-    public punch(): void {
+    public takePunch(): void {
         if (!this.dizzy) {
             this._dizzyCountdown = 2500
         }

@@ -171,6 +171,20 @@ export default class GameController {
             return
         }
 
+        // TODO refactor to allow N players
+        const result = Matter.Collision.collides(this.players[0].body, this.players[1].body)
+        if (result) {
+            const player1 = result.bodyA.data
+            const player2 = result.bodyB.data
+
+            if (player1.attacking && !player2.dizzy) {
+                player2.takePunch()
+            }
+            if (player2.attacking && !player1.dizzy) {
+                player1.takePunch()
+            }
+        }
+
         this._players.forEach((player, idx) => {
             player.handleControls(this.playerControls[idx])
             player.update(delta)
