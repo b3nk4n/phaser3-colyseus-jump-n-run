@@ -25,7 +25,7 @@ export default class RoomClient {
 
     private removePhaseListener: () => void = () => {}
 
-    private _playerIndex: number = -1
+    private currentPlayerIndex: number = -1
 
     constructor() {
         this.client = new Client('ws://localhost:3000')
@@ -36,7 +36,7 @@ export default class RoomClient {
         this.room = await this.client.joinOrCreate('game-room')
 
         this.room.onMessage(Message.PLAYER_INDEX, (message: { playerIndex: number }) => {
-            this._playerIndex = message.playerIndex
+            this.currentPlayerIndex = message.playerIndex
         })
 
         this.room.onStateChange.once(state => {
@@ -110,7 +110,7 @@ export default class RoomClient {
     }
 
     get playerIndex(): number {
-        return this._playerIndex
+        return this.currentPlayerIndex
     }
 
     get phase(): GamePhase {

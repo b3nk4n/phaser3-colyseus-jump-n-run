@@ -33,7 +33,8 @@ const config: Phaser.Types.Core.GameConfig = {
         SinglePlayerMatterGameScene,
         LocalMultiplayerMatterGameScene,
         TextOverlay,
-        MatterTestScene]
+        MatterTestScene
+    ]
 }
 
 export default new Phaser.Game(config)

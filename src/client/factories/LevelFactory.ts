@@ -20,8 +20,8 @@ export default class LevelFactory {
         this.engine = engine
     }
 
-    create(width: number, height: number): Body[] {
-        const bodies: Body[] = []
+    create(width: number, height: number): Matter.Body[] {
+        const bodies: Matter.Body[] = []
         LevelFactory.LEVEL.forEach(platformDef => {
             const platform = new Platform(width * platformDef.x, height * platformDef.y, platformDef.isSmall)
             bodies.push(...platform.bodies)

@@ -20,23 +20,21 @@ export default class ArcadePlayer {
     private static readonly ANIM_DIZZY: string = 'dizzy'
     private static readonly ANIM_DEAD: string = 'dead'
 
-    private readonly context: Phaser.Scene
-    private _sprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+    public readonly sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
 
-    private _attacking: boolean = false
-    private _dizzyCountdown: number = 0
-    private _dead: boolean = false
+    private attacking: boolean = false
+    private dizzyCountdown: number = 0
+    private dead: boolean = false
 
-    constructor(context: Phaser.Scene) {
-        this.context = context
-    }
-
-    public create(x: number, y: number): void {
-        this._sprite = this.context.physics.add.sprite(x, y, Assets.PLAYER_IDLE)
+    constructor(context: Phaser.Scene, x: number, y: number) {
+        this.initAnimations(context)
+        this.sprite = context.physics.add.sprite(x, y, Assets.PLAYER_IDLE)
             .setOrigin(1, 0.5)
             //.setCollideWorldBounds(true)
+    }
 
-        const animContext = this.context.anims
+    private initAnimations(context: Phaser.Scene): void {
+        const animContext = context.anims
         animContext.create({
             key: ArcadePlayer.ANIM_RIGHT,
             frames: animContext.generateFrameNumbers(Assets.PLAYER_RUN_RIGHT, {
@@ -101,21 +99,21 @@ export default class ArcadePlayer {
     public update(time: number, delta: number): void {
         this.updateAnimations()
 
-        if (this.dizzy) {
-            this._dizzyCountdown -= delta
+        if (this.isDizzy) {
+            this.dizzyCountdown -= delta
         }
     }
 
     public handleInput(controls: IControls): void {
-        if (this.dead || this.dizzy) {
-            this._sprite.setVelocity(0, 300)
+        if (this.dead || this.isDizzy) {
+            this.sprite.setVelocity(0, 300)
             return
         }
 
         const touchGround = this.isTouchingGround
 
-        this._attacking = controls.actionKey;
-        if (this._attacking) {
+        this.attacking = controls.actionKey;
+        if (this.isAttacking) {
             this.applyFrictionToPlayer(touchGround)
             return
         }
@@ -123,20 +121,20 @@ export default class ArcadePlayer {
         const movementFactor = touchGround ? 1.0 : 0.85
 
         if (controls.left) {
-            this._sprite.setVelocityX(-ArcadePlayer.SPEED * movementFactor)
+            this.sprite.setVelocityX(-ArcadePlayer.SPEED * movementFactor)
         } else if (controls.right) {
-            this._sprite.setVelocityX(ArcadePlayer.SPEED * movementFactor)
+            this.sprite.setVelocityX(ArcadePlayer.SPEED * movementFactor)
         } else {
             this.applyFrictionToPlayer(touchGround)
         }
         if (controls.up && touchGround) {
-            this._sprite.setVelocityY(-ArcadePlayer.JUMP_SPEED)
+            this.sprite.setVelocityY(-ArcadePlayer.JUMP_SPEED)
         }
     }
 
     private applyFrictionToPlayer(touchGround) {
         const friction = touchGround ? 0.85 : 0.95
-        this._sprite.setVelocityX(this.sprite.body.velocity.x * friction)
+        this.sprite.setVelocityX(this.sprite.body.velocity.x * friction)
     }
 
     private updateAnimations(): void {
@@ -145,7 +143,7 @@ export default class ArcadePlayer {
             return
         }
 
-        if (this.dizzy) {
+        if (this.isDizzy) {
             this.sprite.anims.play(ArcadePlayer.ANIM_DIZZY)
             return
         }
@@ -160,7 +158,7 @@ export default class ArcadePlayer {
 
         this.sprite.flipX = isLeft
 
-        if (this._attacking) {
+        if (this.isAttacking) {
             this.sprite.anims.play(ArcadePlayer.ANIM_ATTACK, true)
             return
         }
@@ -185,33 +183,29 @@ export default class ArcadePlayer {
     }
 
     public takePunch(): void {
-        if (!this.dizzy) {
-            this._dizzyCountdown = 2500
+        if (!this.isDizzy) {
+            this.dizzyCountdown = 2500
         }
     }
 
     public kill(): void {
         this.sprite.setTint(0xffaaaa)
-        this._dead = true
+        this.dead = true
     }
 
     get isTouchingGround() {
-        return this._sprite.body.touching.down
+        return this.sprite.body.touching.down
     }
 
-    get sprite(): Phaser.GameObjects.Sprite {
-        return this._sprite
+    get isDizzy() {
+        return this.dizzyCountdown > 0
     }
 
-    get dizzy() {
-        return this._dizzyCountdown > 0
+    get isDead() {
+        return this.dead
     }
 
-    get dead() {
-        return this._dead
-    }
-
-    get attacking() {
-        return this._attacking
+    get isAttacking() {
+        return this.attacking
     }
 }

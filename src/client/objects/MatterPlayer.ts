@@ -1,76 +1,79 @@
 import Matter from 'matter-js'
 
 import { IControls } from '../../shared/types/commons'
+import BaseObject from './BaseObject'
 
-export default class MatterPlayer {
+export default class MatterPlayer extends BaseObject {
+    public static readonly TYPE: string = 'player'
 
-    private readonly _body: Matter.Body
-    private _markDelete: boolean = false
 
-    private static readonly ATTACK_COOLDOWN: number = 1000
-    private _attackingCountdown: number = 0
+    public static readonly BODY_LABEL: string = 'body'
+    public static readonly FEET_LABEL: string = 'feet'
 
-    private _facingLeft: boolean = false
-    private _dizzyCountdown: number = 0
-    private _dead: boolean = false
-    private _touchingGround = false
-    private _score: number = 0
-    private readonly _color: number
+    private attackingCountdown: number = 0
 
-    private readonly initialX
-    private readonly initialY
-    private readonly initialFacingLeft
+    private facingLeft: boolean = false
+    private dizzyCountdown: number = 0
+    private dead: boolean = false
+    private touchingGround = false
+    public score: number = 0
+    public readonly color: number
+
+    private readonly initialX: number
+    private readonly initialY: number
+    private readonly initialFacingLeft: boolean
 
     constructor(x: number, y: number, facingLeft: boolean, color: number) {
+        super(MatterPlayer.TYPE, x, y)
         this.initialX = x
         this.initialY = y
         this.initialFacingLeft = facingLeft
-        this._facingLeft = facingLeft
-        this._color = color
+        this.facingLeft = facingLeft
+        this.color = color
+    }
 
+    protected createBody(x: number, y: number): Matter.Body {
         const bodyOptions = {
             inertia: Infinity, // prevent body rotation
             collisionFilter: {
                 group: -1
             },
-            isPlayer: true,
-            data: this
+            label: MatterPlayer.BODY_LABEL,
+            plugin: this // TODO is this needed?
         }
 
         const mainBodyPart = Matter.Bodies.circle(x, y, 16, bodyOptions)
         const groundSensor = Matter.Bodies.rectangle(x, y + 16, 16, 8, {
-            isPlayerFeet: true,
+            label: MatterPlayer.FEET_LABEL,
             isSensor: true,
-            data: this
+            plugin: this // TODO is this needed?
         })
-        this._body = Matter.Body.create({
+        return Matter.Body.create({
             ...bodyOptions,
             parts: [
                 mainBodyPart,
                 groundSensor
             ],
         })
-        this._body.idString = '' + this._body.id
     }
 
     public reset(): void {
-        this._dead = false
-        this._dizzyCountdown = 0
-        this._markDelete = false
-        this._attackingCountdown = 0
-        this._facingLeft = this.initialFacingLeft
-        this._score = 0
+        this.dead = false
+        this.dizzyCountdown = 0
+        this.attackingCountdown = 0
+        this.facingLeft = this.initialFacingLeft
+        this.score = 0
 
         Matter.Body.setPosition(this.body, { x: this.initialX, y: this.initialY })
         Matter.Body.setVelocity(this.body, { x: 0, y: 0 })
     }
 
     public update(delta: number): void {
-        if (this._dizzyCountdown > 0) {
-            this._dizzyCountdown -= delta
+        if (this.dizzyCountdown > 0) {
+            this.dizzyCountdown -= delta
         }
-        if (this._attackingCountdown > 0) {
-            this._attackingCountdown -= delta
+        if (this.attackingCountdown > 0) {
+            this.attackingCountdown -= delta
         }
     }
 
@@ -78,8 +81,8 @@ export default class MatterPlayer {
         const { left, up, right, actionKey } = controls
         const { x: vx, y: vy } = this.body.velocity
 
-        if (this.dead || this.dizzy) {
-            this._attackingCountdown = 0
+        if (this.isDead || this.isDizzy) {
+            this.attackingCountdown = 0
             return
         }
 
@@ -87,15 +90,15 @@ export default class MatterPlayer {
         let newY = vy
 
         if (actionKey && this.canAttack) {
-            this._attackingCountdown = 1500
+            this.attackingCountdown = 1500
         }
-        if (!this.attacking) {
+        if (!this.isAttacking) {
             if (right && !left) {
-                this._facingLeft = false
+                this.facingLeft = false
                 newX = 3
             }
             if (left && !right) {
-                this._facingLeft = true
+                this.facingLeft = true
                 newX = -3
             }
         }
@@ -108,68 +111,44 @@ export default class MatterPlayer {
     }
 
     public touchGround(): void {
-        this._touchingGround = true
+        this.touchingGround = true
     }
 
     public releaseGround(): void {
-        this._touchingGround = false
+        this.touchingGround = false
     }
 
     public takePunch(): void {
-        if (!this.dizzy) {
-            this._dizzyCountdown = 2500
+        if (!this.isDizzy) {
+            this.dizzyCountdown = 2500
         }
     }
 
     public kill(): void {
-        this._dead = true
+        this.dead = true
     }
 
-    public addScore(value: number): void {
-        this._score += value
-    }
-
-    get color(): number {
-        return this._color
-    }
-
-    get facingLeft(): boolean {
-        return this._facingLeft
+    get isFacingLeft(): boolean {
+        return this.facingLeft
     }
 
     get canJump() {
-        return this._touchingGround
+        return this.touchingGround
     }
 
-    get body() {
-        return this._body
+    get isDizzy() {
+        return this.dizzyCountdown > 0
     }
 
-    get markDelete() {
-        return this._markDelete
-    }
-
-    set markDelete(value: boolean) {
-        this._markDelete = value
-    }
-
-    get dizzy() {
-        return this._dizzyCountdown > 0
-    }
-
-    get dead() {
-        return this._dead
+    get isDead() {
+        return this.dead
     }
 
     get canAttack() {
-        return this._attackingCountdown <= 0
+        return this.attackingCountdown <= 0
     }
 
-    get attacking() {
-        return this._attackingCountdown > MatterPlayer.ATTACK_COOLDOWN
-    }
-
-    get score() {
-        return this._score
+    get isAttacking() {
+        return this.attackingCountdown > 1000
     }
 }

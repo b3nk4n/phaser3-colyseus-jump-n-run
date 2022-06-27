@@ -1,12 +1,16 @@
 import Matter from 'matter-js'
 
-export default class Bomb {
+import BaseObject from './BaseObject'
 
-    private readonly _body: Matter.Body
-    private _markDelete: boolean = false
+export default class Bomb extends BaseObject {
+    public static readonly TYPE: string = 'bomb'
 
     constructor(x: number, y: number) {
-        this._body = Matter.Bodies.rectangle(x, y, 16, 16, {
+        super(Bomb.TYPE, x, y)
+    }
+    
+    createBody(x: number, y: number): Matter.Body {
+        return Matter.Bodies.rectangle(x, y, 16, 16, {
             inertia: Infinity,
             restitution: 1.0,
             friction: 0,
@@ -15,21 +19,7 @@ export default class Bomb {
             collisionFilter: {
                 group: -2
             },
-            isBomb: true,
-            data: this
+            plugin: this
         })
-        this._body.idString = '' + this._body.id
-    }
-
-    get body() {
-        return this._body
-    }
-
-    get markDelete() {
-        return this._markDelete
-    }
-
-    set markDelete(value: boolean) {
-        this._markDelete = value
     }
 }

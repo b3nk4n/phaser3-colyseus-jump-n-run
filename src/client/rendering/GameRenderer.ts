@@ -5,6 +5,10 @@ import GameController from '../controllers/GameController'
 import Assets from '../assets/Assets'
 import { DEBUG_MODE } from '../main'
 import Hud from '../ui/Hud'
+import Platform from '../objects/Platform'
+import MatterPlayer from '../objects/MatterPlayer'
+import Diamond from '../objects/Diamond'
+import Bomb from '../objects/Bomb'
 
 export default class GameRenderer {
 
@@ -43,15 +47,15 @@ export default class GameRenderer {
 
         const bodies = this.controller.allBodies()
         bodies.forEach(body => {
-            if (body.isPlatform) {
+            if (body.plugin.type === Platform.TYPE) {
                 this.addPlatformSprite(body)
             }
-            if (body.isPlayer) {
+            if (body.plugin.type === MatterPlayer.TYPE) {
                 this.addPlayerSprite(body)
             }
         })
 
-        this.hud.create(this.controller.players.length)
+        this.hud.create(this.controller.allPlayers.length)
 
         if (DEBUG_MODE) {
             this.debugRenderer = Matter.Render.create({
@@ -72,9 +76,13 @@ export default class GameRenderer {
         this.hud.dispose()
 
         // cleanup renderer according to https://github.com/liabru/matter-js/issues/564
+        // @ts-ignore
         this.debugRenderer.canvas.remove();
+        // @ts-ignore
         this.debugRenderer.canvas = null;
+        // @ts-ignore
         this.debugRenderer.context = null;
+        // @ts-ignore
         this.debugRenderer.textures = {};
     }
 
@@ -144,7 +152,7 @@ export default class GameRenderer {
     public reset(): void {
         this.controller.allBodies().forEach(body => {
             if (!body.isStatic) {
-                const sprite = this.context.children.getByName(body.idString)
+                const sprite = this.context.children.getByName(body.plugin.id)
                 if (sprite != null) {
                     sprite.destroy()
                 }
@@ -153,18 +161,18 @@ export default class GameRenderer {
     }
 
     public update(): void {
-        this.controller.players.forEach((player, idx) =>
+        this.controller.allPlayers.forEach((player, idx) =>
             this.hud.updateScore(idx, player.score))
-        this.hud.updateLevel(this.controller.level)
+        this.hud.updateLevel(this.controller.currentLevel)
 
         this.controller.allBodies().forEach(body => {
             if (body.isStatic) {
                 return
             }
 
-            const sprite = this.context.children.getByName(body.idString) as Phaser.GameObjects.Sprite
+            const sprite = this.context.children.getByName(body.plugin.id) as Phaser.GameObjects.Sprite
 
-            if (body.data.markDelete) {
+            if (body.plugin.markDelete) {
                 if (sprite != null) {
                     // According to https://phaser.io/examples/v3/view/game-objects/group/destroy-child, this internally fires
                     // a 'destroy' event that the group is listening to and then automatically removes it.
@@ -174,13 +182,13 @@ export default class GameRenderer {
                 return
             }
 
-            if (body.isDiamond) {
+            if (body.plugin.type === Diamond.TYPE) {
                 this.updateDiamond(sprite, body)
             }
-            if (body.isPlayer) {
+            if (body.plugin.type === MatterPlayer.TYPE) {
                 this.updatePlayer(sprite, body)
             }
-            if (body.isBomb) {
+            if (body.plugin.type === Bomb.TYPE) {
                 this.updateBomb(sprite, body)
             }
         })
@@ -205,7 +213,7 @@ export default class GameRenderer {
         }
         sprite.setPosition(body.position.x, body.position.y)
 
-        const { dead, dizzy, attacking, canJump, facingLeft } = body.data
+        const { dead, dizzy, attacking, canJump, facingLeft } = body.plugin
         if (dead) {
             sprite.anims.play(GameRenderer.ANIM_DEAD)
             sprite.setTint(0xffaaaa)
@@ -218,7 +226,7 @@ export default class GameRenderer {
             return
         }
 
-        sprite.setTint(body.data.color)
+        sprite.setTint(body.plugin.color)
 
         const velocityX = body.velocity.x
         const velocityY = body.velocity.y
@@ -262,26 +270,26 @@ export default class GameRenderer {
     }
 
     private addPlatformSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
-        const asset = body.data.isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE
+        const asset = body.plugin.isSmall ? Assets.PLATFORM_SMALL : Assets.PLATFORM_LARGE
         return this.context.add.sprite(body.position.x, body. position.y, asset)
-            .setName(body.idString)
+            .setName(body.plugin.id)
     }
 
     private addDiamondSprite(body: Matter.Body) {
-        const asset = body.data.value > 10 ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN
+        const asset = body.plugin.value > 10 ? Assets.DIAMOND_RED : Assets.DIAMOND_GREEN
         return this.context.add.sprite(body.position.x, body. position.y, asset)
-            .setName(body.idString)
+            .setName(body.plugin.id)
     }
 
     private addPlayerSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
         return this.context.add.sprite(body.position.x, body. position.y, Assets.PLAYER_IDLE)
-            .setTint(body.data.color)
-            .setFlipX(body.data.facingLeft)
-            .setName(body.idString)
+            .setTint(body.plugin.color)
+            .setFlipX(body.plugin.facingLeft)
+            .setName(body.plugin.id)
     }
 
     private addBombSprite(body: Matter.Body) {
         return this.context.add.sprite(body.position.x, body. position.y, Assets.BOMB)
-            .setName(body.idString)
+            .setName(body.plugin.id)
     }
 }

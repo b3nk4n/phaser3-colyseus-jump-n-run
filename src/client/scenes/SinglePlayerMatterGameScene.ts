@@ -19,9 +19,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     }
 
     init(): void {
-        this.gameController = new GameController()
-        this.gameRenderer = new GameRenderer(this, this.gameController)
-
+    
         this.keyboardKeys = {
             cursors: this.input.keyboard.createCursorKeys(),
             space: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
@@ -31,8 +29,10 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     create(): void {
         const { width, height } = this.scale
 
-        this.gameController.create(width, height, 1)
-        this.gameController.gamePhaseChangedCallback = (newPhase, oldPhase) => {
+        this.gameController = new GameController(width, height, 1)
+        this.gameRenderer = new GameRenderer(this, this.gameController)
+
+        this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {
             if (oldPhase === GamePhase.WAITING && newPhase == GamePhase.READY) {
                 this.scene.stop(TextOverlay.KEY)
                 this.scene.launch(TextOverlay.KEY, {
@@ -54,12 +54,12 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
                     text: 'Press SPACE to continue'
                 })
             }
-        }
+        });
 
         this.gameRenderer.create()
 
         this.input.keyboard.on('keyup-SPACE', () => {
-            const phase = this.gameController.phase
+            const phase = this.gameController.gamePhase
             if (phase === GamePhase.WAITING) {
                 this.gameController.ready()
             } else if (phase === GamePhase.PAUSED) {
@@ -70,7 +70,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
             }
         })
         this.input.keyboard.on('keyup-ESC', () => {
-            const phase = this.gameController.phase
+            const phase = this.gameController.gamePhase
             if (phase === GamePhase.WAITING ||
                 phase === GamePhase.READY ||
                 phase === GamePhase.PAUSED ||

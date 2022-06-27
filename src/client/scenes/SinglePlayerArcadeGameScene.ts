@@ -32,8 +32,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
     create(): void {
         this.platforms = this.createLevel()
 
-        this.player = new ArcadePlayer(this)
-        this.player.create(100, this.scale.height - TILE_SIZE * 1.5)
+        this.player = new ArcadePlayer(this, 100, this.scale.height - TILE_SIZE * 1.5)
 
         this.physics.add.collider(this.player.sprite, this.platforms)
 

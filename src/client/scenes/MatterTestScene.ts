@@ -9,6 +9,7 @@ import Engine = Matter.Engine
 import Bodies = Matter.Bodies
 import Body = Matter.Body
 import Events = Matter.Events
+// @ts-ignore
 import Collision = Matter.Collision
 
 export default class MatterTestScene extends Phaser.Scene {
@@ -57,9 +58,12 @@ export default class MatterTestScene extends Phaser.Scene {
             collisionFilter: {
                 group: -1
             },
-            isPlayer: true,
-            sprite: this.playerLeft
+            label: 'player',
+            plugin: {
+                sprite: this.playerLeft
+            }
         })
+        console.log({ playerLeftBody: this.playerLeftBody })
 
         this.playerRight = this.add.sprite(500, 400, Assets.PLAYER_JUMP_UP)
             .setFlipX(true)
@@ -68,8 +72,10 @@ export default class MatterTestScene extends Phaser.Scene {
             collisionFilter: {
                 group: -1
             },
-            isPlayer: true,
-            sprite: this.playerRight
+            label: 'player',
+            plugin: {
+                sprite: this.playerRight
+            }
         })
 
         this.bomb = this.add.sprite(450, 100, Assets.BOMB)
@@ -78,7 +84,7 @@ export default class MatterTestScene extends Phaser.Scene {
             restitution: 1,
             friction: 0,
             frictionAir: 0,
-            isBomb: true
+            label: 'bomb'
         })
         // give the bomb a kick
         Body.applyForce(this.bombBody, this.bombBody.position, { x: 0.005, y: 0.005 })
@@ -134,20 +140,30 @@ export default class MatterTestScene extends Phaser.Scene {
 
         Events.on(this.engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
-                const p = bodyA.isPlayer ? bodyA : bodyB
-                const b = bodyA.isBomb ? bodyA : bodyB
-                if (p.isPlayer && b.isBomb) {
-                    Composite.remove(this.engine.world, [b])
+                const player = this.resolveBodyByLabel('player', bodyA, bodyB)
+                const bomb = this.resolveBodyByLabel('bomb', bodyA, bodyB)
+                if (player && bomb) {
+                    Composite.remove(this.engine.world, bomb)
                     this.bomb.visible = false
-                    p.sprite.setTint(0xff6666)
+                    player.plugin.sprite.setTint(0xff6666)
                 }
             });
         });
     }
 
+    private resolveBodyByLabel(label: string, bodyA: Body, bodyB: Body): Body | null {
+        if (bodyA.label === label) {
+            return bodyA
+        }
+        if (bodyB.label === label) {
+            return bodyB
+        }
+        return null
+    }
+
     disableGravityFor(body: Body): void {
         const gravity = this.engine.world.gravity
-        Events.on(this.engine, 'beforeUpdate', function() {
+        Events.on(this.engine, 'beforeUpdate', () => {
             Body.applyForce(body, body.position, {
                 x: -gravity.x * gravity.scale * body.mass,
                 y: -gravity.y * gravity.scale * body.mass

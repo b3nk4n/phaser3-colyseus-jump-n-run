@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import LocalMultiplayerMatterGameScene from './LocalMultiplayerMatterGameScene'
 import SinglePlayerMatterGameScene from './SinglePlayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './SinglePlayerArcadeGameScene'
+import MatterTestScene from './MatterTestScene'
 import GameScene from '../scenes/GameScene'
 import TextButton from '../ui/TextButton'
 import Assets from '../assets/Assets'
@@ -36,7 +37,7 @@ export default class MenuScene extends Phaser.Scene {
         this.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 
-        this.add.text(width * 0.5, height * 0.2, 'Select Game Mode', {
+        this.add.text(width * 0.5, height * 0.1, 'Select Game Mode', {
             fontSize: '48px'
         }).setOrigin(0.5)
 
@@ -49,6 +50,8 @@ export default class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5)
 
         this.buttons.push(...[
+            new TextButton(this, width * 0.5, height * 0.2, 'Test Scene')
+                .onSelect(() => this.scene.start(MatterTestScene.KEY)),
             new TextButton(this, width * 0.5, height * 0.4, 'Arcade Physics')
                 .onSelect(() => this.scene.start(SinglePlayerArcadeGameScene.KEY)),
             new TextButton(this, width * 0.5, height * 0.5, 'MatterJS Physics')

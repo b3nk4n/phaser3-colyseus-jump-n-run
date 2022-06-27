@@ -21,9 +21,6 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     }
 
     init(): void {
-        this.gameController = new GameController()
-        this.gameRenderer = new GameRenderer(this, this.gameController)
-
         this.keyboardKeys.push({
             cursors: this.input.keyboard.createCursorKeys(),
             action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
@@ -37,8 +34,10 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     create(): void {
         const { width, height } = this.scale
 
-        this.gameController.create(width, height, LocalMultiplayerMatterGameScene.NUM_PLAYERS)
-        this.gameController.gamePhaseChangedCallback = (newPhase, oldPhase) => {
+        this.gameController = new GameController(width, height, LocalMultiplayerMatterGameScene.NUM_PLAYERS)
+        this.gameRenderer = new GameRenderer(this, this.gameController)
+
+        this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {
             if (oldPhase === GamePhase.WAITING && newPhase == GamePhase.READY) {
                 this.scene.stop(TextOverlay.KEY)
                 this.scene.launch(TextOverlay.KEY, {
@@ -60,12 +59,12 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
                     text: 'Press SPACE to continue'
                 })
             }
-        }
+        })
 
         this.gameRenderer.create()
 
         this.input.keyboard.on('keyup-SPACE', () => {
-            const phase = this.gameController.phase
+            const phase = this.gameController.gamePhase
             if (phase === GamePhase.WAITING) {
                 this.gameController.ready()
             } else if (phase === GamePhase.PAUSED) {
@@ -76,7 +75,7 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
             }
         })
         this.input.keyboard.on('keyup-ESC', () => {
-            const phase = this.gameController.phase
+            const phase = this.gameController.gamePhase
             if (phase === GamePhase.WAITING ||
                 phase === GamePhase.READY ||
                 phase === GamePhase.PAUSED ||

@@ -1,48 +1,42 @@
-import Matter from 'matter-js'
+import Matter, { IBodyDefinition } from 'matter-js'
 
 export default class Platform {
+    public static readonly TYPE: string = 'platform'
 
     private readonly surfaceBody: Matter.Body
     private readonly outerSlideBody: Matter.Body
-    private readonly _isSmall: boolean
-    private _markDelete: boolean = false
+    public readonly isSmall: boolean
+    public readonly id: string
 
     constructor(x: number, y: number, isSmall: boolean) {
-        this._isSmall = isSmall
+        this.isSmall = isSmall
 
-        const bodyOptions = {
+        const bodyOptions: IBodyDefinition = {
             isStatic: true,
-            isPlatform: true,
-            data: this
+            plugin: this
         }
 
         const padding = 4;
         const platformWidth = isSmall ? 160 : 320
 
         this.surfaceBody = Matter.Bodies.rectangle(x, y, platformWidth - 2 * padding, 32, bodyOptions)
-        this.surfaceBody.idString = '' + this.surfaceBody.id
 
+        // Use a different body at the bottom to make the sides free of friction. As of now,
+        // it is unfortunately not possible in MatterJS to compose a body with different physical properties
         this.outerSlideBody = Matter.Bodies.rectangle(x, y, platformWidth, 32, bodyOptions)
         this.outerSlideBody.friction = 0
-        this.outerSlideBody.idString = '' + this.outerSlideBody.id
+
+        this.id = String(this.surfaceBody.id)
     }
 
-    get bodies() {
+    get bodies(): Array<Matter.Body> {
         return [
             this.surfaceBody,
             this.outerSlideBody
         ]
     }
 
-    get isSmall() {
-        return this._isSmall
-    }
-
-    get markDelete() {
-        return this._markDelete
-    }
-
-    set markDelete(value: boolean) {
-        this._markDelete = value
+    get type() {
+        return Platform.TYPE
     }
 }
