@@ -56,8 +56,6 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
             }
         });
 
-        this.gameRenderer.create()
-
         this.input.keyboard.on('keyup-SPACE', () => {
             const phase = this.gameController.gamePhase
             if (phase === GamePhase.WAITING) {
