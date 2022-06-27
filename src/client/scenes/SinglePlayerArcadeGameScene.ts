@@ -4,6 +4,7 @@ import { IControls } from '../../shared/types/commons'
 import ArcadePlayer from '../objects/ArcadePlayer'
 import { TILE_SIZE } from '../../shared/constants'
 import Assets from '../assets/Assets'
+import MenuScene from './MenuScene'
 import Hud from '../ui/Hud'
 
 export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
@@ -40,6 +41,14 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         this.hud.create(1)
 
         this.startGame()
+
+        this.input.keyboard.once('keyup-ESC', () => {
+            this.scene.start(MenuScene.KEY)
+        })
+
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.input.keyboard.off('keyup-ESC')
+        })
     }
 
     private startGame(): void {

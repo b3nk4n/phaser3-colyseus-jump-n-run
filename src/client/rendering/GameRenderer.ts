@@ -213,14 +213,14 @@ export default class GameRenderer {
         }
         sprite.setPosition(body.position.x, body.position.y)
 
-        const { dead, dizzy, attacking, canJump, facingLeft } = body.plugin
-        if (dead) {
+        const { isDead, isDizzy, isAttacking, canJump, isFacingLeft } = body.plugin
+        if (isDead) {
             sprite.anims.play(GameRenderer.ANIM_DEAD)
             sprite.setTint(0xffaaaa)
             return
         }
 
-        if (dizzy) {
+        if (isDizzy) {
             sprite.setTint(0xffcccc)
             sprite.anims.play(GameRenderer.ANIM_DIZZY)
             return
@@ -235,9 +235,9 @@ export default class GameRenderer {
         const isJumpingUp = velocityY <= -GameRenderer.IDLE_VELOCITY_EPSILON
         const isJumpingDown = velocityY >= GameRenderer.IDLE_VELOCITY_EPSILON
 
-        sprite.flipX = facingLeft
+        sprite.flipX = isFacingLeft
 
-        if (attacking) {
+        if (isAttacking) {
             sprite.anims.play(GameRenderer.ANIM_ATTACK, true)
             return
         }
@@ -284,7 +284,7 @@ export default class GameRenderer {
     private addPlayerSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
         return this.context.add.sprite(body.position.x, body. position.y, Assets.PLAYER_IDLE)
             .setTint(body.plugin.color)
-            .setFlipX(body.plugin.facingLeft)
+            .setFlipX(body.plugin.isFacingLeft)
             .setName(body.plugin.id)
     }
 

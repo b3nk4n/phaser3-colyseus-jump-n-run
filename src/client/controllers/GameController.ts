@@ -57,7 +57,7 @@ export default class GameController {
                 const diamond = this.resolveBody(Diamond.TYPE, bodyA, bodyB)
                 const ground = this.resolveStaticBody(bodyA, bodyB)
                 const bomb = this.resolveBody(Bomb.TYPE, bodyA, bodyB)
-                console.log({bodyA, bodyB, player, playerFeet, diamond, ground, bomb});
+
                 if (player && diamond) {
                     this.onPlayerDiamondCollisionStart(player, diamond)
                 }
@@ -206,10 +206,10 @@ export default class GameController {
                 const player1 = result.bodyA.plugin
                 const player2 = result.bodyB.plugin
 
-                if (player1.attacking && !player2.dizzy) {
+                if (player1.isAttacking && !player2.isDizzy) {
                     player2.takePunch()
                 }
-                if (player2.attacking && !player1.dizzy) {
+                if (player2.isAttacking && !player1.isDizzy) {
                     player1.takePunch()
                 }
             }
@@ -232,6 +232,8 @@ export default class GameController {
     }
 
     public dispose(): void {
+        // @ts-ignore
+        Matter.Events.off(this.engine)
         Matter.Composite.clear(this.engine.world, false)
         Matter.Engine.clear(this.engine)
     }

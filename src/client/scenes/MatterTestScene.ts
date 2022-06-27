@@ -2,6 +2,7 @@ import Matter from 'matter-js'
 import Phaser from 'phaser'
 
 import Assets from '../assets/Assets'
+import MenuScene from './MenuScene'
 
 import Sprite = Phaser.GameObjects.Sprite
 import Composite = Matter.Composite
@@ -63,7 +64,6 @@ export default class MatterTestScene extends Phaser.Scene {
                 sprite: this.playerLeft
             }
         })
-        console.log({ playerLeftBody: this.playerLeftBody })
 
         this.playerRight = this.add.sprite(500, 400, Assets.PLAYER_JUMP_UP)
             .setFlipX(true)
@@ -149,6 +149,16 @@ export default class MatterTestScene extends Phaser.Scene {
                 }
             });
         });
+
+        this.input.keyboard.once('keyup-ESC', () => {
+            this.scene.start(MenuScene.KEY)
+        })
+
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.input.keyboard.off('keyup-ESC')
+            // @ts-ignore
+            Events.off(this.engine, 'collisionStart')
+        })
     }
 
     private resolveBodyByLabel(label: string, bodyA: Body, bodyB: Body): Body | null {
