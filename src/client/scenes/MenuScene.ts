@@ -41,24 +41,18 @@ export default class MenuScene extends Phaser.Scene {
             fontSize: '48px'
         }).setOrigin(0.5)
 
-        this.add.text(width * 0.5, height * 0.325, 'Single-Player', {
-            fontSize: '32px'
-        }).setOrigin(0.5)
-
-        this.add.text(width * 0.5, height * 0.625, 'Multiplayer', {
-            fontSize: '32px'
-        }).setOrigin(0.5)
-
         this.buttons.push(...[
             new TextButton(this, width * 0.5, height * 0.2, 'Test Scene')
                 .onSelect(() => this.scene.start(MatterTestScene.KEY)),
-            new TextButton(this, width * 0.5, height * 0.4, 'Arcade Physics')
+            new TextButton(this, width * 0.5, height * 0.3, '1 Player Arcade')
                 .onSelect(() => this.scene.start(SinglePlayerArcadeGameScene.KEY)),
-            new TextButton(this, width * 0.5, height * 0.5, 'MatterJS Physics')
+            new TextButton(this, width * 0.5, height * 0.4, '1 Player MatterJS')
                 .onSelect(() => this.scene.start(SinglePlayerMatterGameScene.KEY)),
-            new TextButton(this, width * 0.5, height * 0.7, 'Local 2 Player Battle')
-                .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY)),
-            new TextButton(this, width * 0.5, height * 0.8, 'Online Battle')
+            new TextButton(this, width * 0.5, height * 0.5, '2 Player MatterJS')
+                .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY, { numPlayers: 2 })),
+            new TextButton(this, width * 0.5, height * 0.6, '3 Player MatterJS')
+                .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY, { numPlayers: 3 })),
+            new TextButton(this, width * 0.5, height * 0.7, 'Online Battle')
                 .onSelect(() => this.scene.start(GameScene.KEY)),
         ])
 

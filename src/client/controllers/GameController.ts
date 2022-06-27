@@ -26,8 +26,8 @@ export default class GameController {
     private level: number = 0
 
     constructor(width: number, height: number, numPlayers: number) {
-        if (numPlayers < 0 || numPlayers > 2) {
-            throw Error('Only 1 or 2 players are supported.')
+        if (numPlayers < 0 || numPlayers > PLAYER_CONFIG.length) {
+            throw Error(`The requested number of ${numPlayers} players is not support.`)
         }
 
         this.engine = Matter.Engine.create()
@@ -198,19 +198,28 @@ export default class GameController {
             return
         }
 
-        if (this.players.length > 1) {
-            // TODO refactor to allow N players
-            // @ts-ignore https://github.com/DefinitelyTyped/DefinitelyTyped/pull/60962
-            const result = Matter.Collision.collides(this.players[0].body, this.players[1].body)
-            if (result) {
-                const player1 = result.bodyA.plugin
-                const player2 = result.bodyB.plugin
+        this.updatePlayers(delta)
 
-                if (player1.isAttacking && !player2.isDizzy) {
-                    player2.takePunch()
-                }
-                if (player2.isAttacking && !player1.isDizzy) {
-                    player1.takePunch()
+        Matter.Engine.update(this.engine, delta)
+    }
+
+    private updatePlayers(delta: number): void {
+        if (this.players.length > 1) {
+            for (let i = 0; i < this.players.length - 1; ++i) {
+                for (let j = i + 1; j < this.players.length; ++j) {
+                    // @ts-ignore https://github.com/DefinitelyTyped/DefinitelyTyped/pull/60962
+                    const result = Matter.Collision.collides(this.players[i].body, this.players[j].body)
+                    if (result) {
+                        const player1 = result.bodyA.plugin
+                        const player2 = result.bodyB.plugin
+
+                        if (player1.isAttacking && !player2.isDizzy) {
+                            player2.takePunch()
+                        }
+                        if (player2.isAttacking && !player1.isDizzy) {
+                            player1.takePunch()
+                        }
+                    }
                 }
             }
         }
@@ -219,8 +228,6 @@ export default class GameController {
             player.handleControls(this.playerControls[idx])
             player.update(delta)
         })
-
-        Matter.Engine.update(this.engine, delta)
     }
 
     public cleanup(): void {

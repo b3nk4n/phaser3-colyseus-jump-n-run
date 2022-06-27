@@ -29,7 +29,7 @@ export default class GameRenderer {
 
     private hud: Hud
 
-    // TODO better to use a player map instead of a list? The via the id of the body, we could access all we need and we would
+    // TODO better to use a player map instead of a list? Then via the id of the body, we could access all we need and we would
     //      not need this counter here :)
     private registeredPlayers: number = 0
 

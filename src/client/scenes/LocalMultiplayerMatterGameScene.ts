@@ -9,7 +9,7 @@ import MenuScene from '../scenes/MenuScene'
 export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     public static readonly KEY: string = 'local-multiplayer-matter-game'
 
-    private static readonly NUM_PLAYERS = 2
+    private numPlayers!: number
 
     private gameController!: GameController
     private gameRenderer!: GameRenderer
@@ -20,21 +20,31 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
         super(LocalMultiplayerMatterGameScene.KEY)
     }
 
-    init(): void {
+    init({ numPlayers }): void {
+        this.numPlayers = numPlayers
+
         this.keyboardKeys.push({
             cursors: this.input.keyboard.createCursorKeys(),
             action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
         })
-        this.keyboardKeys.push({
-            cursors: this.input.keyboard.addKeys({ left: 'A', right: 'D', up: 'W' }),
-            action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
-        })
+        if (this.numPlayers > 1) {
+            this.keyboardKeys.push({
+                cursors: this.input.keyboard.addKeys({ left: 'A', right: 'D', up: 'W' }),
+                action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
+            })
+        }
+        if (this.numPlayers > 2) {
+            this.keyboardKeys.push({
+                cursors: this.input.keyboard.addKeys({ left: 'J', right: 'L', up: 'I' }),
+                action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U)
+            })
+        }
     }
 
     create(): void {
         const { width, height } = this.scale
 
-        this.gameController = new GameController(width, height, LocalMultiplayerMatterGameScene.NUM_PLAYERS)
+        this.gameController = new GameController(width, height, this.numPlayers)
         this.gameRenderer = new GameRenderer(this, this.gameController)
 
         this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {
@@ -102,7 +112,7 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        for (let pIdx = 0; pIdx < LocalMultiplayerMatterGameScene.NUM_PLAYERS; ++pIdx) {
+        for (let pIdx = 0; pIdx < this.numPlayers; ++pIdx) {
             const controls = this.keyboardControls(pIdx)
             this.gameController.setPlayerControls(pIdx, controls)
         }
