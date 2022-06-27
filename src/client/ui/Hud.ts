@@ -16,23 +16,8 @@ export default class Hud {
 
     constructor(context: Phaser.Scene) {
         this.context = context
-    }
 
-    public create(numPlayers: number): void {
         const { width, height } = this.context.scale
-
-        for (let i = 0; i < numPlayers; ++i) {
-            this.scoreValues.push(0)
-            const scoreText = this.context.add.text(
-                16, 16 + i * 32,
-                this.formatScore(0),
-                {
-                    fontSize: '28px',
-                    color: '#FFF'
-                })
-                .setTint(PLAYER_CONFIG[i].color)
-            this.scoreTexts.push(scoreText)
-        }
 
         this.levelText = this.context.add.text(
             width - 148, 16,
@@ -47,6 +32,27 @@ export default class Hud {
             .setFontSize(48)
             .setOrigin(0.5)
             .setVisible(false)
+    }
+
+    public reset(): void {
+        this.scoreValues = []
+        this.scoreTexts.forEach(scoreText => scoreText.destroy())
+        this.scoreTexts = []
+        this.levelValue = 1
+    }
+
+    public addPlayer(): void {
+        const playerIdx = this.scoreValues.length
+        this.scoreValues.push(0)
+        const scoreText = this.context.add.text(
+            16, 16 + playerIdx * 32,
+            this.formatScore(0),
+            {
+                fontSize: '28px',
+                color: '#FFF'
+            })
+            .setTint(PLAYER_CONFIG[playerIdx].color)
+        this.scoreTexts.push(scoreText)
     }
 
     public dispose(): void {

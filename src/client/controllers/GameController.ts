@@ -1,7 +1,7 @@
 import Matter, { Body } from 'matter-js'
 
 import { GamePhase, IControls, EMPTY_CONTROLS } from '../../shared/types/commons'
-import { TILE_SIZE, PLAYER_CONFIG } from '../../shared/constants'
+import { TILE_SIZE, IPlayerConfig } from '../../shared/constants'
 import { randomBetween } from '../../shared/randomUtils'
 import LevelFactory from '../factories/LevelFactory'
 import MatterPlayer from '../objects/MatterPlayer'
@@ -13,7 +13,9 @@ export default class GameController {
     public readonly engine: Matter.Engine
     private readonly levelFactory: LevelFactory
 
-    private width!: number
+
+    private width: number
+    private height: number
 
     private players: MatterPlayer[] = []
     private playerControls: IControls[] = []
@@ -22,33 +24,17 @@ export default class GameController {
     private gamePhaseChangedCallback: (newPhase: GamePhase, oldPhase: GamePhase) => void = () => {}
     private gameOverCountdown: number = 0
 
-    private activeDiamonds: number = 0
+    private activeDiamonds: number = 0 // TODO investigate why the game round sometimes finished even though there are still diamonds left
     private level: number = 0
 
-    constructor(width: number, height: number, numPlayers: number) {
-        if (numPlayers < 0 || numPlayers > PLAYER_CONFIG.length) {
-            throw Error(`The requested number of ${numPlayers} players is not support.`)
-        }
-
+    constructor(width: number, height: number) {
         this.engine = Matter.Engine.create()
         this.levelFactory = new LevelFactory(this.engine)
 
         this.width = width
+        this.height = height
         const envBodies = this.levelFactory.create(width, height)
         Matter.Composite.add(this.engine.world, envBodies)
-
-        // We set the position slightly above the ground, because when we restart the game then we set the position manually
-        // using Body.setPosition(body, pos), which however only causes a collision-end event, but no collision-start event.
-        for (let i = 0; i < numPlayers; ++i) {
-            const playerConfig = PLAYER_CONFIG[i]
-            const player = this.addPlayer(
-                playerConfig.startX,
-                height - 1.75 * TILE_SIZE,
-                playerConfig.facingLeft,
-                playerConfig.color)
-            this.players.push(player)
-            this.playerControls.push(EMPTY_CONTROLS)
-        }
 
         Matter.Events.on(this.engine, 'collisionStart', ({ pairs }) => {
             pairs.forEach(({ bodyA, bodyB }) => {
@@ -171,6 +157,18 @@ export default class GameController {
         }
 
         this.addBomb()
+    }
+
+    public registerPlayer(playerConfig: IPlayerConfig): void {
+        const player = this.addPlayer(
+            playerConfig.startX,
+            // We set the position slightly above the ground, because when we restart the game then we set the position manually
+            // using Body.setPosition(body, pos), which however only causes a collision-end event, but no collision-start event.
+            this.height - 1.75 * TILE_SIZE,
+            playerConfig.facingLeft,
+            playerConfig.color)
+        this.players.push(player)
+        this.playerControls.push(EMPTY_CONTROLS)
     }
 
     public setPlayerControls(playerIdx: number, controls: IControls): void {

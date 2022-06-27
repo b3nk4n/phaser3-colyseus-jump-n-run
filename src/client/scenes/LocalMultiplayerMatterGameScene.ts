@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 import { GamePhase, IControls } from '../../shared/types/commons'
 import GameController from '../controllers/GameController'
+import { PLAYER_CONFIG } from '../../shared/constants'
 import TextOverlay from '../ui/overlays/TextOverlay'
 import GameRenderer from '../rendering/GameRenderer'
 import MenuScene from '../scenes/MenuScene'
@@ -21,6 +22,10 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     }
 
     init({ numPlayers }): void {
+        if (numPlayers < 0 || numPlayers > PLAYER_CONFIG.length) {
+            throw Error(`The requested number of ${numPlayers} players is not support.`)
+        }
+
         this.numPlayers = numPlayers
 
         this.keyboardKeys.push({
@@ -43,9 +48,13 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
 
     create(): void {
         const { width, height } = this.scale
-
-        this.gameController = new GameController(width, height, this.numPlayers)
+        
+        this.gameController = new GameController(width, height)
         this.gameRenderer = new GameRenderer(this, this.gameController)
+
+        for (let i = 0; i < this.numPlayers; ++i) {
+            this.gameController.registerPlayer(PLAYER_CONFIG[i])
+        }
 
         this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {
             if (oldPhase === GamePhase.WAITING && newPhase == GamePhase.READY) {
@@ -103,6 +112,7 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
         })
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.keyboardKeys = []
             this.input.keyboard.off('keyup-SPACE')
             this.input.keyboard.off('keyup-ESC')
 

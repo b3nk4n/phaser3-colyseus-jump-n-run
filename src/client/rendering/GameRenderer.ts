@@ -36,7 +36,7 @@ export default class GameRenderer {
     constructor(context: Phaser.Scene, controller: GameController) {
         this.context = context
         this.controller = controller
-        this.hud = new Hud(context)
+    
 
         this.context.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
@@ -48,12 +48,9 @@ export default class GameRenderer {
             if (body.plugin.type === Platform.TYPE) {
                 this.addPlatformSprite(body)
             }
-            if (body.plugin.type === MatterPlayer.TYPE) {
-                this.addPlayerSprite(body)
-            }
         })
 
-        this.hud.create(this.controller.allPlayers.length)
+        this.hud = new Hud(context)
 
         if (DEBUG_MODE) {
             this.debugRenderer = Matter.Render.create({
@@ -156,13 +153,11 @@ export default class GameRenderer {
                 }
             }
         })
+
+        this.hud.reset()
     }
 
     public update(): void {
-        this.controller.allPlayers.forEach((player, idx) =>
-            this.hud.updateScore(idx, player.score))
-        this.hud.updateLevel(this.controller.currentLevel)
-
         this.controller.allBodies().forEach(body => {
             if (body.isStatic) {
                 return
@@ -190,6 +185,10 @@ export default class GameRenderer {
                 this.updateBomb(sprite, body)
             }
         })
+
+        this.controller.allPlayers.forEach((player, idx) =>
+            this.hud.updateScore(idx, player.score))
+        this.hud.updateLevel(this.controller.currentLevel)
 
         if (this.debugRenderer) {
             Matter.Render.world(this.debugRenderer)
@@ -280,6 +279,7 @@ export default class GameRenderer {
     }
 
     private addPlayerSprite(body: Matter.Body): Phaser.GameObjects.Sprite {
+        this.hud.addPlayer()
         return this.context.add.sprite(body.position.x, body. position.y, Assets.PLAYER_IDLE)
             .setTint(body.plugin.color)
             .setFlipX(body.plugin.isFacingLeft)

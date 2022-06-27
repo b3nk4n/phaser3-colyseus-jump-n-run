@@ -96,7 +96,6 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.player.sprite, this.platforms)
 
         this.hud = new Hud(this)
-        this.hud.create(1)
 
         this.handlePhaseChanged(state.phase)
         this.roomClient?.onPhaseChanged(this.handlePhaseChanged, this)

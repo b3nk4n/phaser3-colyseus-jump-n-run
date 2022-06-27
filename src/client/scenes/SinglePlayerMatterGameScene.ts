@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 import { GamePhase, IControls } from '../../shared/types/commons'
 import GameController from '../controllers/GameController'
+import { PLAYER_CONFIG } from '../../shared/constants'
 import TextOverlay from '../ui/overlays/TextOverlay'
 import GameRenderer from '../rendering/GameRenderer'
 import MenuScene from '../scenes/MenuScene'
@@ -12,7 +13,7 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     private gameController!: GameController
     private gameRenderer!: GameRenderer
 
-    private keyboardKeys
+    private keyboardKeys: any
 
     constructor() {
         super(SinglePlayerMatterGameScene.KEY)
@@ -29,7 +30,9 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
     create(): void {
         const { width, height } = this.scale
 
-        this.gameController = new GameController(width, height, 1)
+        this.gameController = new GameController(width, height)
+        this.gameController.registerPlayer(PLAYER_CONFIG[0])
+        
         this.gameRenderer = new GameRenderer(this, this.gameController)
 
         this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {

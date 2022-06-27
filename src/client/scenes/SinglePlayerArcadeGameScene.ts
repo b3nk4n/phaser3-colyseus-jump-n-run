@@ -38,7 +38,7 @@ export default class SinglePlayerArcadeGameScene extends Phaser.Scene {
         this.physics.add.collider(this.player.sprite, this.platforms)
 
         this.hud = new Hud(this)
-        this.hud.create(1)
+        this.hud.addPlayer()
 
         this.startGame()
 
