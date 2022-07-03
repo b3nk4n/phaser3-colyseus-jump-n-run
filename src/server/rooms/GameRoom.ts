@@ -43,9 +43,6 @@ export class GameRoom extends Room<GameState> {
                 player.y = playerBody.position.y
                 player.velocityX = playerBody.velocity.x
                 player.velocityY = playerBody.velocity.y
-                if (idx == 0) {
-                    //console.log({pos: playerBody.position, vel: playerBody.velocity})
-                }
             })
 
         }, updateDelta)

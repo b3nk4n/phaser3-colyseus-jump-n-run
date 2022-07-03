@@ -37,7 +37,6 @@ export default class GameRenderer {
         this.context = context
         this.controller = controller
     
-
         this.context.add.image(0, 0, Assets.BACKGROUND)
             .setOrigin(0, 0)
 

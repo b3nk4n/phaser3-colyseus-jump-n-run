@@ -44,7 +44,7 @@ export default class GameController {
                 const ground = this.resolveStaticBody(bodyA, bodyB)
                 const bomb = this.resolveBody(Bomb.TYPE, bodyA, bodyB)
 
-                if (player && diamond) {
+                if (player && diamond && !playerFeet) {
                     this.onPlayerDiamondCollisionStart(player, diamond)
                 }
                 if (playerFeet && ground) {
