@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 
 import LocalMultiplayerMatterGameScene from './LocalMultiplayerMatterGameScene'
-import SinglePlayerMatterGameScene from './SinglePlayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './SinglePlayerArcadeGameScene'
 import MatterTestScene from './MatterTestScene'
 import GameScene from '../scenes/GameScene'
@@ -47,7 +46,7 @@ export default class MenuScene extends Phaser.Scene {
             new TextButton(this, width * 0.5, height * 0.3, '1 Player Arcade')
                 .onSelect(() => this.scene.start(SinglePlayerArcadeGameScene.KEY)),
             new TextButton(this, width * 0.5, height * 0.4, '1 Player MatterJS')
-                .onSelect(() => this.scene.start(SinglePlayerMatterGameScene.KEY)),
+                .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY, { numPlayers: 1 })),
             new TextButton(this, width * 0.5, height * 0.5, '2 Player MatterJS')
                 .onSelect(() => this.scene.start(LocalMultiplayerMatterGameScene.KEY, { numPlayers: 2 })),
             new TextButton(this, width * 0.5, height * 0.6, '3 Player MatterJS')

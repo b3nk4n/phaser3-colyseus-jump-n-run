@@ -3,7 +3,6 @@ import Phaser from 'phaser'
 
 import LocalMultiplayerMatterGameScene from './scenes/LocalMultiplayerMatterGameScene'
 import SinglePlayerArcadeGameScene from './scenes/SinglePlayerArcadeGameScene'
-import SinglePlayerMatterGameScene from './scenes/SinglePlayerMatterGameScene'
 import MatterTestScene from './scenes/MatterTestScene'
 import TextOverlay from './ui/overlays/TextOverlay'
 import BootstrapScene from './scenes/BoostrapScene'
@@ -30,7 +29,6 @@ const config: Phaser.Types.Core.GameConfig = {
         MenuScene,
         GameScene,
         SinglePlayerArcadeGameScene,
-        SinglePlayerMatterGameScene,
         LocalMultiplayerMatterGameScene,
         TextOverlay,
         MatterTestScene

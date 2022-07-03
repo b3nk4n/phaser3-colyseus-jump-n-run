@@ -22,12 +22,16 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     }
 
     init({ numPlayers }): void {
-        if (numPlayers < 0 || numPlayers > PLAYER_CONFIG.length) {
+        if (numPlayers < 1 || numPlayers > PLAYER_CONFIG.length) {
             throw Error(`The requested number of ${numPlayers} players is not support.`)
         }
 
         this.numPlayers = numPlayers
 
+        this.initKeyboardKeys()
+    }
+
+    private initKeyboardKeys(): void {
         this.keyboardKeys.push({
             cursors: this.input.keyboard.createCursorKeys(),
             action: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
