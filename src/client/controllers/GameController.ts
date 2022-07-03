@@ -13,7 +13,6 @@ export default class GameController {
     public readonly engine: Matter.Engine
     private readonly levelFactory: LevelFactory
 
-
     private width: number
     private height: number
 
@@ -116,19 +115,42 @@ export default class GameController {
         this.gameOverCountdown = 3000
     }
 
-    public ready(): void {
+    public handleConfirmSignal(): void {
+        const phase = this.phase
+        if (phase === GamePhase.WAITING) {
+            this.ready()
+        } else if (phase === GamePhase.PAUSED) {
+            this.resume()
+        } else if (phase === GamePhase.GAME_OVER) {
+            this.restart()
+        }
+    }
+
+    public handleCancelSignal(): void {
+        const phase = this.phase
+        if (phase === GamePhase.WAITING ||
+            phase === GamePhase.READY ||
+            phase === GamePhase.PAUSED || 
+            phase === GamePhase.GAME_OVER) {
+            this.leave()
+        } else if (phase === GamePhase.PLAYING) {
+            this.pause()
+        }
+    }
+
+    private ready(): void {
         this.updatePhase(GamePhase.READY)
     }
 
-    public pause(): void {
+    private pause(): void {
         this.updatePhase(GamePhase.PAUSED)
     }
 
-    public resume(): void {
+    private resume(): void {
         this.updatePhase(GamePhase.PLAYING)
     }
 
-    public restart(): void {
+    private restart(): void {
         this.updatePhase(GamePhase.READY)
 
         this.level = 1
@@ -147,8 +169,8 @@ export default class GameController {
         this.startGame()
     }
 
-    public leave(): void {
-        // TODO send notification to server in case of online multiplayer?
+    private leave(): void {
+        this.updatePhase(GamePhase.TERMINATED)
     }
 
     private startGame(): void {
@@ -176,9 +198,9 @@ export default class GameController {
     }
 
     public update(delta: number): void {
-        if (this.gamePhase !== GamePhase.PLAYING) {
+        if (this.phase !== GamePhase.PLAYING) {
             const allPlayersAreReady = true // TODO implement logic for N players
-            if (this.gamePhase === GamePhase.READY && allPlayersAreReady) {
+            if (this.phase === GamePhase.READY && allPlayersAreReady) {
                 this.updatePhase(GamePhase.PLAYING)
             }
             return
@@ -295,10 +317,6 @@ export default class GameController {
                 this.gamePhaseChangedCallback(newPhase, prevPhase)
             }
         }
-    }
-
-    get gamePhase(): GamePhase {
-        return this.phase
     }
 
     get allPlayers(): MatterPlayer[] {

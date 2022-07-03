@@ -23,5 +23,6 @@ export enum GamePhase {
     READY,
     PLAYING,
     PAUSED,
-    GAME_OVER
+    GAME_OVER,
+    TERMINATED
 }

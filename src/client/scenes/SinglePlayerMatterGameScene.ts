@@ -56,33 +56,20 @@ export default class SinglePlayerMatterGameScene extends Phaser.Scene {
                     title: 'GAME OVER',
                     text: 'Press SPACE to continue'
                 })
+            } else if (oldPhase === GamePhase.GAME_OVER && newPhase != GamePhase.TERMINATED) {
+                this.gameRenderer.reset()
+            } else if (newPhase === GamePhase.TERMINATED) {
+                this.scene.stop(TextOverlay.KEY)
+                this.scene.stop(SinglePlayerMatterGameScene.KEY)
+                this.scene.start(MenuScene.KEY)
             }
         });
 
         this.input.keyboard.on('keyup-SPACE', () => {
-            const phase = this.gameController.gamePhase
-            if (phase === GamePhase.WAITING) {
-                this.gameController.ready()
-            } else if (phase === GamePhase.PAUSED) {
-                this.gameController.resume()
-            } else if (phase === GamePhase.GAME_OVER) {
-                this.gameRenderer.reset()
-                this.gameController.restart()
-            }
+            this.gameController.handleConfirmSignal()
         })
         this.input.keyboard.on('keyup-ESC', () => {
-            const phase = this.gameController.gamePhase
-            if (phase === GamePhase.WAITING ||
-                phase === GamePhase.READY ||
-                phase === GamePhase.PAUSED ||
-                phase === GamePhase.GAME_OVER) {
-                this.scene.stop(TextOverlay.KEY)
-                this.scene.stop(SinglePlayerMatterGameScene.KEY)
-                this.scene.start(MenuScene.KEY)
-                this.gameController.leave()
-            } else if (phase === GamePhase.PLAYING) {
-                this.gameController.pause()
-            }
+            this.gameController.handleCancelSignal()
         })
 
         // start with initial overlay
