@@ -49,19 +49,14 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
     create(): void {
         const { width, height } = this.scale
         
-        this.gameController = new GameController(width, height)
+        this.gameController = new GameController(width, height, this.numPlayers)
         this.gameRenderer = new GameRenderer(this, this.gameController)
-
-        for (let i = 0; i < this.numPlayers; ++i) {
-            this.gameController.registerPlayer(PLAYER_CONFIG[i])
-        }
 
         this.gameController.onGamePhaseChanged((newPhase, oldPhase) => {
             if (oldPhase === GamePhase.WAITING && newPhase == GamePhase.READY) {
                 this.scene.stop(TextOverlay.KEY)
                 this.scene.launch(TextOverlay.KEY, {
-                    title: 'Waiting for other players...',
-                    text: 'Press ESC to quite'
+                    title: 'Press SPACE to start...'
                 })
             } else if (oldPhase === GamePhase.READY && newPhase == GamePhase.PLAYING) {
                 this.scene.stop(TextOverlay.KEY)
@@ -95,7 +90,8 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
 
         // start with initial overlay
         this.scene.launch(TextOverlay.KEY, {
-            title: 'Press SPACE to start...'
+            title: 'Waiting for other players...',
+            text: 'Press ESC to quite'
         })
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -106,6 +102,10 @@ export default class LocalMultiplayerMatterGameScene extends Phaser.Scene {
             this.gameController.dispose()
             this.gameRenderer.dispose()
         });
+
+        for (let i = 0; i < this.numPlayers; ++i) {
+            this.gameController.registerPlayer(PLAYER_CONFIG[i])
+        }
     }
 
     update(time: number, delta: number): void {

@@ -16,6 +16,7 @@ export default class GameController {
     private width: number
     private height: number
 
+    private expectedNumPlayers: number
     private players: MatterPlayer[] = []
     private playerControls: IControls[] = []
 
@@ -23,15 +24,16 @@ export default class GameController {
     private gamePhaseChangedCallback: (newPhase: GamePhase, oldPhase: GamePhase) => void = () => {}
     private gameOverCountdown: number = 0
 
-    private activeDiamonds: number = 0 // TODO investigate why the game round sometimes finished even though there are still diamonds left
+    private activeDiamonds: number = 0
     private level: number = 0
 
-    constructor(width: number, height: number) {
-        this.engine = Matter.Engine.create()
-        this.levelFactory = new LevelFactory(this.engine)
-
+    constructor(width: number, height: number, expectedNumPlayers: number) {
         this.width = width
         this.height = height
+        this.expectedNumPlayers = expectedNumPlayers
+
+        this.engine = Matter.Engine.create()
+        this.levelFactory = new LevelFactory(this.engine)
         const envBodies = this.levelFactory.create(width, height)
         Matter.Composite.add(this.engine.world, envBodies)
 
@@ -118,9 +120,11 @@ export default class GameController {
     public handleConfirmSignal(): void {
         const phase = this.phase
         if (phase === GamePhase.WAITING) {
-            this.ready()
+            this.updatePhase(GamePhase.READY)
+        } else if (phase === GamePhase.READY) {
+            this.updatePhase(GamePhase.PLAYING)
         } else if (phase === GamePhase.PAUSED) {
-            this.resume()
+            this.updatePhase(GamePhase.PLAYING)
         } else if (phase === GamePhase.GAME_OVER) {
             this.restart()
         }
@@ -134,20 +138,8 @@ export default class GameController {
             phase === GamePhase.GAME_OVER) {
             this.leave()
         } else if (phase === GamePhase.PLAYING) {
-            this.pause()
+            this.updatePhase(GamePhase.PAUSED)
         }
-    }
-
-    private ready(): void {
-        this.updatePhase(GamePhase.READY)
-    }
-
-    private pause(): void {
-        this.updatePhase(GamePhase.PAUSED)
-    }
-
-    private resume(): void {
-        this.updatePhase(GamePhase.PLAYING)
     }
 
     private restart(): void {
@@ -191,6 +183,10 @@ export default class GameController {
             playerConfig.color)
         this.players.push(player)
         this.playerControls.push(EMPTY_CONTROLS)
+
+        if (this.players.length == this.expectedNumPlayers) {
+            this.updatePhase(GamePhase.READY)
+        }
     }
 
     public setPlayerControls(playerIdx: number, controls: IControls): void {
@@ -199,10 +195,6 @@ export default class GameController {
 
     public update(delta: number): void {
         if (this.phase !== GamePhase.PLAYING) {
-            const allPlayersAreReady = true // TODO implement logic for N players
-            if (this.phase === GamePhase.READY && allPlayersAreReady) {
-                this.updatePhase(GamePhase.PLAYING)
-            }
             return
         }
 
